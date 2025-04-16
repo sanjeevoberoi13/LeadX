@@ -142,12 +142,14 @@
     background: #1e1e1e;
     color: #fff;
   }
+  
   .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: white;
+  background: #ffffff70;
+  backdrop-filter: blur(40px);
   border-bottom: 3px dotted #787878;
   position: sticky;
   top: 0;
@@ -157,7 +159,8 @@
   .dark-mode .header,
   .dark-mode .controls,
   .dark-mode .stats {
-    background: #2b2b2b;
+    background: #00000058;
+    backdrop-filter: blur(40px);
 }
 
   .toggle {
@@ -188,7 +191,8 @@
   display: flex;
   justify-content: space-around;
   padding: 1rem;
-  background: white;
+  background: #ffffff70;
+  backdrop-filter: blur(40px);
   border-bottom: 1px solid #ccc;
   position: sticky;
   top: 81px; /* Adjust based on .header height */
@@ -208,12 +212,13 @@
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 1rem;
-  background: white;
+  background: #ffffff70;
+  backdrop-filter: blur(40px);
   position: sticky;
   top: 160px; /* Adjust based on combined height of .header + .stats */
   z-index: 900;
   border-bottom: 2px dotted #7e7e7e;
-}
+  }
 .controls input{
   background: #f6f6f6;
   outline: none;
