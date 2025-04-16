@@ -673,7 +673,7 @@ window.addEventListener('click', (e) => {
   }
 });
 
-
+<!-- excell  -->
 
 function exportToExcel() {
   const leads = getLeads();
@@ -701,13 +701,37 @@ function exportToExcel() {
       lead.phone,
       lead.product,
       lead.comment || "",
-      lead.status,
+      lead.status
     ]);
   });
 
   const ws = XLSX.utils.aoa_to_sheet(data);
 
-  // Optional: Styling, widths, etc.
+  const headerCells = ["A4", "B4", "C4", "D4", "E4", "F4"];
+  headerCells.forEach(cell => {
+    if (!ws[cell]) return;
+    ws[cell].s = {
+      fill: { patternType: "solid", fgColor: { rgb: "D9EAD3" } },
+      alignment: { horizontal: "center" },
+      font: { bold: "true" }
+    };
+  });
+
+  for (let i = 0; i < leads.length; i++) {
+    const status = leads[i].status?.toLowerCase();
+    const cellRef = `F${i + 5}`;
+    if (!ws[cellRef]) continue;
+
+    ws[cellRef].s = {
+      fill: {
+        patternType: "solid",
+        fgColor: { rgb: status === "open" ? "F4CCCC" : "D9EAD3" }
+      },
+      alignment: { horizontal: "center" },
+      font: { color: { rgb: "000000" }, bold: true }
+    };
+  }
+
   const wscols = [
     { wch: 10 },
     { wch: 20 },
@@ -720,18 +744,28 @@ function exportToExcel() {
 
   XLSX.utils.book_append_sheet(wb, ws, "Leads");
 
-  // Convert to binary and trigger manual download
-  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  const blob = new Blob([wbout], { type: "application/octet-stream" });
+  // Convert to Blob and trigger download
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "binary" });
 
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `Leads_${dateStr.replace(/\//g, '-')}.xlsx`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  function s2ab(s) {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+  }
+
+  const blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Leads_${dateStr.replace(/\//g, '-')}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
+  
 <!-- export to pdf -->
 function exportToPDF() {
   const leads = getLeads();
@@ -747,61 +781,70 @@ function exportToPDF() {
   const dateStr = now.toLocaleDateString();
   const timeStr = now.toLocaleTimeString();
 
-  doc.setFontSize(12);
-  doc.text("Data Till Date:", 14, 20);
-  doc.text(dateStr, 60, 20);
-  doc.text("Time:", 14, 28);
-  doc.text(timeStr, 60, 28);
+  const logoImg = new Image();
+  logoImg.crossOrigin = "Anonymous";
+  logoImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqbja7rslLjXRoXZdaH0MH5a971bbL0LQT_9levYNfSFogkgGDJQiBgNmY&s=10';
 
-  const tableColumn = ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"];
-  const tableRows = leads.map((lead, index) => [
-    index + 1,
-    lead.name,
-    lead.phone,
-    lead.product || "-",
-    lead.comment || "-",
-    lead.status
-  ]);
+  logoImg.onload = () => {
+    doc.addImage(logoImg, 'PNG', 140, 10, 50, 15);
+    doc.setFontSize(12);
+    doc.text("Data Till Date:", 15, 18);
+    doc.text(dateStr, 50, 18);
+    doc.text("Time:", 15, 25);
+    doc.text(timeStr, 50, 25);
 
-  doc.autoTable({
-    startY: 35,
-    head: [tableColumn],
-    body: tableRows,
-    styles: {
-      halign: 'center',
-      fontSize: 10
-    },
-    headStyles: {
-      fillColor: [217, 234, 211],
-      textColor: 0,
-      fontStyle: 'bold'
-    },
-    didParseCell: function (data) {
-      if (data.section === 'body' && data.column.index === 5) {
-        if (data.cell.text[0].toLowerCase() === 'open') {
-          data.cell.styles.fillColor = [244, 204, 204];
-        } else if (data.cell.text[0].toLowerCase() === 'closed') {
-          data.cell.styles.fillColor = [217, 234, 211];
+    const tableColumn = ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"];
+    const tableRows = leads.map((lead, index) => [
+      index + 1,
+      lead.name,
+      lead.phone,
+      lead.product || "-",
+      lead.comment || "-",
+      lead.status
+    ]);
+
+    doc.autoTable({
+      startY: 35,
+      head: [tableColumn],
+      body: tableRows,
+      styles: {
+        halign: 'left',
+        fontSize: 10
+      },
+      headStyles: {
+        fillColor: [217, 234, 211],
+        textColor: 0,
+        fontStyle: 'bold'
+      },
+      didParseCell: function (data) {
+        if (data.section === 'body' && data.column.index === 5) {
+          const status = data.cell.text[0].toLowerCase();
+          if (status === 'open') {
+            data.cell.styles.fillColor = [244, 204, 204];
+          } else if (status === 'closed') {
+            data.cell.styles.fillColor = [217, 234, 211];
+          }
         }
+      },
+      didDrawPage: function (data) {
+        const pageHeight = doc.internal.pageSize.height;
+        doc.setFontSize(10);
+        doc.text("Made with Love", 14, pageHeight - 10);
+        doc.text("Page " + doc.internal.getNumberOfPages(), doc.internal.pageSize.width - 30, pageHeight - 10);
       }
-    },
-    didDrawPage: function (data) {
-      const pageHeight = doc.internal.pageSize.height;
-      doc.setFontSize(10);
-      doc.text("Generated by Lead Manager", 14, pageHeight - 10);
-      doc.text("Page " + doc.internal.getNumberOfPages(), doc.internal.pageSize.width - 30, pageHeight - 10);
-    }
-  });
+    });
 
-  // Use blob to safely trigger file download
-  const pdfBlob = doc.output("blob");
-  const url = URL.createObjectURL(pdfBlob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `Leads_${dateStr.replace(/\//g, '-')}.pdf`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+    // Save PDF using Blob for better WebView compatibility
+    const pdfBlob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `Leads_${dateStr.replace(/\//g, '-')}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  };
 }
 </script>
 </body>
