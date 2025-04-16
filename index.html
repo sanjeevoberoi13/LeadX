@@ -685,7 +685,7 @@ function exportToExcel() {
   const data = [
     ["Data Till Date", dateStr],
     ["Time", timeStr],
-    [], // A3 blank
+    [],
     ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"],
   ];
 
@@ -696,67 +696,36 @@ function exportToExcel() {
       lead.phone,
       lead.product,
       lead.comment || "",
-      lead.status
+      lead.status,
     ]);
   });
 
   const ws = XLSX.utils.aoa_to_sheet(data);
 
-  // Header styling (A4 to F4)
-  const headerCells = ["A4", "B4", "C4", "D4", "E4", "F4"];
-  headerCells.forEach(cell => {
-    if (!ws[cell]) return;
-    ws[cell].s = {
-      fill: {
-        patternType: "solid",
-        fgColor: { rgb: "D9EAD3" } // Light green
-      },
-      alignment: {
-        horizontal: "center"
-      },
-      font: {
-        bold: "true"
-      }
-    };
-  });
-
-  // Status cell coloring (column F starting from row 5)
-  for (let i = 0; i < leads.length; i++) {
-    const status = leads[i].status?.toLowerCase();
-    const cellRef = `F${i + 5}`; // Starts from row 5
-    if (!ws[cellRef]) continue;
-
-    ws[cellRef].s = {
-      fill: {
-        patternType: "solid",
-        fgColor: { rgb: status === "open" ? "F4CCCC" : "D9EAD3" } // red for open, green for closed
-      },
-      alignment: {
-        horizontal: "center"
-      },
-      font: {
-        color: { rgb: "000000" },
-        bold: true
-      }
-    };
-  }
-
-  // Column widths
+  // Optional: Styling, widths, etc.
   const wscols = [
-    { wch: 10 }, // Sr No.
-    { wch: 20 }, // Name
-    { wch: 15 }, // Phone No.
-    { wch: 20 }, // Product
-    { wch: 25 }, // Remark
-    { wch: 10 }, // Status
+    { wch: 10 },
+    { wch: 20 },
+    { wch: 15 },
+    { wch: 20 },
+    { wch: 25 },
+    { wch: 10 },
   ];
   ws['!cols'] = wscols;
 
   XLSX.utils.book_append_sheet(wb, ws, "Leads");
-  XLSX.writeFile(wb, `Leads_${dateStr.replace(/\//g, '-')}.xlsx`);
+
+  // Convert to binary and trigger manual download
+  const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([wbout], { type: "application/octet-stream" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Leads_${dateStr.replace(/\//g, '-')}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
-
-
 
 <!-- export to pdf -->
 function exportToPDF() {
@@ -773,64 +742,61 @@ function exportToPDF() {
   const dateStr = now.toLocaleDateString();
   const timeStr = now.toLocaleTimeString();
 
-  const logoImg = new Image();
-  logoImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqbja7rslLjXRoXZdaH0MH5a971bbL0LQT_9levYNfSFogkgGDJQiBgNmY&s=10'; // or base64: 'data:image/png;base64,...'
+  doc.setFontSize(12);
+  doc.text("Data Till Date:", 14, 20);
+  doc.text(dateStr, 60, 20);
+  doc.text("Time:", 14, 28);
+  doc.text(timeStr, 60, 28);
 
-  logoImg.onload = () => {
-    // Draw Logo (x, y, width, height)
-    doc.addImage(logoImg, 'PNG', 140, 10, 50, 15);
+  const tableColumn = ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"];
+  const tableRows = leads.map((lead, index) => [
+    index + 1,
+    lead.name,
+    lead.phone,
+    lead.product || "-",
+    lead.comment || "-",
+    lead.status
+  ]);
 
-    // Add Date and Time
-    doc.setFontSize(12);
-    doc.text("Data Till Date:", 15, 18);
-    doc.text(dateStr, 50, 18);
-    doc.text("Time:", 15, 25);
-    doc.text(timeStr, 50, 25);
-
-    // Prepare table data
-    const tableColumn = ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"];
-    const tableRows = leads.map((lead, index) => [
-      index + 1,
-      lead.name,
-      lead.phone,
-      lead.product || "-",
-      lead.comment || "-",
-      lead.status
-    ]);
-
-    doc.autoTable({
-      startY: 35,
-      head: [tableColumn],
-      body: tableRows,
-      styles: {
-        halign: 'left',
-        fontSize: 10
-      },
-      headStyles: {
-        fillColor: [217, 234, 211], // Light green
-        textColor: 0,
-        fontStyle: 'bold'
-      },
-      didParseCell: function (data) {
-        if (data.section === 'body' && data.column.index === 5) {
-          if (data.cell.text[0].toLowerCase() === 'open') {
-            data.cell.styles.fillColor = [244, 204, 204]; // red
-          } else if (data.cell.text[0].toLowerCase() === 'closed') {
-            data.cell.styles.fillColor = [217, 234, 211]; // green
-          }
+  doc.autoTable({
+    startY: 35,
+    head: [tableColumn],
+    body: tableRows,
+    styles: {
+      halign: 'center',
+      fontSize: 10
+    },
+    headStyles: {
+      fillColor: [217, 234, 211],
+      textColor: 0,
+      fontStyle: 'bold'
+    },
+    didParseCell: function (data) {
+      if (data.section === 'body' && data.column.index === 5) {
+        if (data.cell.text[0].toLowerCase() === 'open') {
+          data.cell.styles.fillColor = [244, 204, 204];
+        } else if (data.cell.text[0].toLowerCase() === 'closed') {
+          data.cell.styles.fillColor = [217, 234, 211];
         }
-      },
-      didDrawPage: function (data) {
-        // Footer
-        const pageHeight = doc.internal.pageSize.height;
-        doc.setFontSize(10);
-        doc.text("Made with Love", 14, pageHeight - 10);
-        doc.text("Page " + doc.internal.getNumberOfPages(), doc.internal.pageSize.width - 30, pageHeight - 10);
       }
-    });
+    },
+    didDrawPage: function (data) {
+      const pageHeight = doc.internal.pageSize.height;
+      doc.setFontSize(10);
+      doc.text("Generated by Lead Manager", 14, pageHeight - 10);
+      doc.text("Page " + doc.internal.getNumberOfPages(), doc.internal.pageSize.width - 30, pageHeight - 10);
+    }
+  });
 
-    doc.save(`Leads_${dateStr.replace(/\//g, '-')}.pdf`);
-  };
+  // Use blob to safely trigger file download
+  const pdfBlob = doc.output("blob");
+  const url = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Leads_${dateStr.replace(/\//g, '-')}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 </script>
 </body>
