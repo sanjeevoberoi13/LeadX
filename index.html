@@ -4,17 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lead X</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+   
+  <!-- Fonts CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playwrite+DE+LA:wght@100..400&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/520b138994.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Excel CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.8.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-  .poppins-thin {
+ 
+  <!-- PDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  
+  <!-- style CSS-->
+  <style >
+.poppins-thin {
   font-family: "Poppins", sans-serif;
   font-weight: 100;
   font-style: normal;
@@ -122,134 +130,139 @@
   font-style: italic;
 }
 
-  * { 
+* {
   font-family: "Poppins", sans-serif;
   margin: 0px;
   padding: 0px;
-  box-sizing: border-box; 
-  transition: .4s ease;
-  }
-  html, body{
-      height: 100%;
-  }
-  body {
-    margin: 0;
-    font-size: 12px;
-    background: #f4f4f4;
-    color: #333;
-    transition: background 0.3s, color 0.3s;
-  }
-  .dark-mode {
-    background: #1e1e1e;
-    color: #fff;
-  }
-  .header {
+  box-sizing: border-box;
+  transition: 0.4s ease;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-size: 12px;
+  background: #f4f4f4;
+  color: #333;
+  transition: background 0.3s, color 0.3s;
+}
+.dark-mode {
+  background: #1e1e1e;
+  color: #fff;
+}
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: #ffffff70;
-  backdrop-filter: blur(40px);
+  background: white;
   border-bottom: 3px dotted #787878;
   position: sticky;
   top: 0;
   z-index: 900;
   font-size: 20px;
 }
-  .dark-mode .header,
-  .dark-mode .controls,
-  .dark-mode .stats {
-    background: #00000058;
-    backdrop-filter: blur(40px);
+.dark-mode .header,
+.dark-mode .controls,
+.dark-mode .stats {
+  background: #2b2b2b;
 }
 
-  .toggle {
-    width: 50px;
-    height: 24px;
-    background: #ccc;
-    border-radius: 20px;
-    position: relative;
-    cursor: pointer;
-  }
-  .toggle::after {
-    content: "";
-    width: 22px;
-    height: 22px;
-    background: #444;
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    border-radius: 50%;
-    transition: 0.3s;
-  }
-  .dark .toggle::after {
-    left: 27px;
-    background: #fff;
-  }
+.toggle {
+  width: 50px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+}
+.toggle::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  background: #444;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.dark .toggle::after {
+  left: 27px;
+  background: #fff;
+}
 
-  .stats {
+.stats {
   display: flex;
   justify-content: space-around;
   padding: 1rem;
-  background: #ffffff70;
-  backdrop-filter: blur(40px);
+  background: white;
   border-bottom: 1px solid #ccc;
   position: sticky;
   top: 81px; /* Adjust based on .header height */
   z-index: 900;
 }
-  .stat-box { text-align: center; }
-  .stat-box span {
-    display: block;
-    font-weight: bold;
-    font-size: 1rem;
-  }
-  .stat-total { color: #007bff; }
-  .stat-open { color: #e60000; }
-  .stat-closed { color: #009900; }
+.stat-box {
+  text-align: center;
+}
+.stat-box span {
+  display: block;
+  font-weight: bold;
+  font-size: 1rem;
+}
+.stat-total {
+  color: #007bff;
+}
+.stat-open {
+  color: #e60000;
+}
+.stat-closed {
+  color: #009900;
+}
 
-  .controls {
+.controls {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 1rem;
-  background: #ffffff70;
-  backdrop-filter: blur(40px);
+  background: white;
   position: sticky;
   top: 160px; /* Adjust based on combined height of .header + .stats */
   z-index: 900;
   border-bottom: 2px dotted #7e7e7e;
 }
-.controls input{
+.controls input {
   background: #f6f6f6;
   outline: none;
 }
-.dark-mode .controls input{
+.dark-mode .controls input {
   background: #383838;
   color: white;
 }
 .dark-mode thead th {
   background: #2b2b2b;
 }
-  button {
-    padding: 0.5rem 1rem;
-    border: none;
-    background: #007bff;
-    color: white;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .table-container {
-  padding: 5px 15px
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 14px;
 }
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 12px; /* Spacing between rows */
-    background: transparent;
-  }
-  thead th {
+
+.table-container {
+  padding: 5px 15px;
+}
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px; /* Spacing between rows */
+  background: transparent;
+}
+thead th {
   text-align: left;
   font-size: 13px;
   padding: 0.1rem 1rem;
@@ -259,89 +272,97 @@
   top: 218px; /* Adjust based on combined height above */
   z-index: 900;
 }
-  tbody tr {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-  }
-  .dark-mode tbody tr {
-    background: #2b2b2b;
-    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
-  }
-  td {
-    padding: 0.75rem;
-    vertical-align: top;
-  }
+tbody tr {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.dark-mode tbody tr {
+  background: #2b2b2b;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+td {
+  padding: 0.75rem;
+  vertical-align: top;
+}
 
-  .status-open, .status-closed {
-    padding: 5px 10px;
-    border-radius: 12px;
-    color: white;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-block;
-    width: 70px;
-    text-align: center;
-  }
-  .status-open { background: #e60000; }
-  .status-closed { background: #009900; }
+.status-open,
+.status-closed {
+  padding: 5px 10px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-block;
+  width: 70px;
+  text-align: center;
+}
+.status-open {
+  background: #e60000;
+}
+.status-closed {
+  background: #009900;
+}
 
-  .comment-line {
-    font-size: 12px;
-    color: #555;
-    padding: 8px 12px 12px 12px;
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 0 0 12px 12px;
-    margin-top: -10px;
-  }
-  .dark-mode .comment-line {
-    color: #aaa;
-    background: rgba(255, 255, 255, 0.05);
-  }
+.comment-line {
+  font-size: 12px;
+  color: #555;
+  padding: 8px 12px 12px 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 0 0 12px 12px;
+  margin-top: -10px;
+}
+.dark-mode .comment-line {
+  color: #aaa;
+  background: rgba(255, 255, 255, 0.05);
+}
 
-  /* Modal Styles */
-  .modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    backdrop-filter: blur(3px);
-    background-color: #ffffff32;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 900;
-  }
-  .modal-content {
-    background: white;
-    padding: 1rem;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    
-  }
-  .modal-content input,
-  .modal-content select,
-  .modal-content textarea {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
-    font-size: 14px;
-  }
-  .modal-content textarea { resize: vertical; }
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(3px);
+  background-color: #ffffff32;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 900;
+}
+.modal-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+}
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  font-size: 14px;
+}
+.modal-content textarea {
+  resize: vertical;
+}
 
-  .dark-mode .modal-content {
-    background: #333;
-    color: white;
-  }
-  .dark-mode .modal-content input,
-  .dark-mode .modal-content select,
-  .dark-mode .modal-content textarea {
-    background: #444;
-    color: white;
-    border: none;
-  }
-  .lead-card {
+.dark-mode .modal-content {
+  background: #333;
+  color: white;
+}
+.dark-mode .modal-content input,
+.dark-mode .modal-content select,
+.dark-mode .modal-content textarea {
+  background: #444;
+  color: white;
+  border: none;
+}
+.lead-card {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -371,31 +392,31 @@
   color: #aaa;
   background: rgba(255, 255, 255, 0.05);
 }
-.cardinter{
-    border-radius: 15px;
+.cardinter {
+  border-radius: 15px;
 }
-.theme-btn{
-    border-radius: 10px;
-    font-size: 20px;
+.theme-btn {
+  border-radius: 10px;
+  font-size: 20px;
 }
-.fa-location-arrow{
-    font-size: 25px;
-    color: #ffc700;
+.fa-location-arrow {
+  font-size: 25px;
+  color: #ffc700;
 }
-.dark-mode .fa-location-arrow{
-    color: #d47100;
+.dark-mode .fa-location-arrow {
+  color: #d47100;
 }
-.footer-content{
-    font-size: 26px;
-    padding: 25px;
-    color: #d3d3d3;
+.footer-content {
+  font-size: 26px;
+  padding: 25px;
+  color: #d3d3d3;
 }
-footer{
-    height: 200px;
+footer {
+  height: 200px;
 }
-.dark-mode .location-popup{
-    background: #424242;
-    color: white;
+.dark-mode .location-popup {
+  background: #424242;
+  color: white;
 }
 .location-popup {
   position: absolute;
@@ -403,8 +424,8 @@ footer{
   right: 20px; /* align near your location icon */
   background: white;
   border-radius: 25px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-  Color: black;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  color: black;
   padding: 20px 30px;
   font-weight: bold;
   font-size: 17px;
@@ -426,429 +447,391 @@ footer{
 .hidden {
   display: none;
 }
-</style>  
+</style>
 </head>
 <body>
+    <!-- HEADER -->
     <div class="hd">
-  <div class="header">
-    <div>
-        <i class="fas fa-location-arrow"></i>     
-    </div>
-    <div id="theme-toggle" class="theme-btn">
-        <i class="far fa-moon"></i>
-    </div>
-  </div>
-
-  <div class="stats">
-    <div class="stat-box">
-      <span class="stat-total">Total Lead</span>
-      <span id="total-count">0</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-open">Open Lead</span>
-      <span id="open-count">0</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-closed">Closed Lead</span>
-      <span id="closed-count">0</span>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button onclick="openLeadForm()"><i class="fas fa-plus"></i> Add Lead</button>
-    <input type="text" id="search-input" placeholder="Search lead..." oninput="filterLeads()" style="padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; width: 200px;">
-  </div>
-
-  <div class="table-container">
-    <table id="lead-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Product</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal" id="leadModal">
-    <div class="modal-content">
-      <input type="text" id="lead-name" placeholder="Name" />
-      <input type="text" id="lead-phone" placeholder="Phone" />
-      <input type="text" id="lead-product" placeholder="Product" />
-      <select id="lead-status">
-        <option value="Open">Open</option>
-        <option value="Closed">Closed</option>
-      </select>
-      <textarea id="lead-comment" rows="3" placeholder="Comment (optional)"></textarea>
-      <button onclick="saveLead()">Generate Lead</button>
-      <button onclick="deleteLead()" id="delete-btn" style="background: #e60000;">Delete Lead</button>
-    </div>
-  </div>
-  
-  <div id="locationMenu" class="location-popup hidden">
-  <div class="menu-item" onclick="exportToExcel()">
-    <i class="fas fa-file-excel"></i> Export to Excel
-  </div>
-  <div class="menu-item" onclick="sharePDF()">
-  <i class="fas fa-file-pdf"></i> Share as PDF
-</div>
-</div>
-  
-  
-  </div>
-  <footer>
-      <div class="footer-content">
-          <h1>Made With Love <i class="fas fa-heart"></i></h1>
-      </div>
-  </footer>
-  
-  <!-- script js-->
-  
-  <script>
-  let editIndex = null;
-
-  const toggle = document.getElementById("theme-toggle");
-  toggle.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark-mode");
-    toggle.classList.toggle("dark", isDark);
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
-
-  function loadTheme() {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.body.classList.add("dark-mode");
-      toggle.classList.add("dark");
-    }
-  }
-
-  function openLeadForm(index = null) {
-  editIndex = index;
-  const modal = document.getElementById("leadModal");
-
-  if (leadModal) {
-    leadModal.style.display = "flex";
-  } else {
-    console.error('Modal element not found. Check if id="Modal" exists in your HTML.');
-    return;
-  }
-
-  if (index !== null) {
-    const leads = getLeads();
-    const lead = leads[index];
-    document.getElementById("lead-name").value = lead.name;
-    document.getElementById("lead-phone").value = lead.phone;
-    document.getElementById("lead-product").value = lead.product;
-    document.getElementById("lead-status").value = lead.status;
-    document.getElementById("lead-comment").value = lead.comment || '';
-    document.getElementById("delete-btn").style.display = "inline-block";
-  } else {
-    document.getElementById("lead-name").value = "";
-    document.getElementById("lead-phone").value = "";
-    document.getElementById("lead-product").value = "";
-    document.getElementById("lead-status").value = "Open";
-    document.getElementById("lead-comment").value = "";
-    document.getElementById("delete-btn").style.display = "none";
-  }
-}
-
-  function closeModal() {
-    document.getElementById("leadModal").style.display = "none";
-  }
-
-  function validatePhoneNumber(phone) {
-    const phonePattern = /^[0-9]{10}$/;
-    return phonePattern.test(phone);
-  }
-
-  function saveLead() {
-    const name = document.getElementById("lead-name").value.trim();
-    const phone = document.getElementById("lead-phone").value.trim();
-    const product = document.getElementById("lead-product").value.trim();
-    const status = document.getElementById("lead-status").value;
-    const comment = document.getElementById("lead-comment").value.trim();
-
-    if (!name || !phone || !product || !status) {
-      alert("All fields are required.");
-      return;
-    }
-
-    if (!validatePhoneNumber(phone)) {
-      alert("Please enter a valid 10-digit phone number.");
-      return;
-    }
-
-    const leads = getLeads();
-    const newLead = { name, phone, product, status, comment };
-
-    if (editIndex !== null) {
-      leads[editIndex] = newLead;
-    } else {
-      leads.push(newLead);
-    }
-
-    localStorage.setItem("leads", JSON.stringify(leads));
-    renderLeads();
-    closeModal();
-  }
-
-  function deleteLead() {
-    if (!confirm("Are you sure you want to delete this lead?")) return;
-
-    const leads = getLeads();
-    leads.splice(editIndex, 1);
-    localStorage.setItem("leads", JSON.stringify(leads));
-    renderLeads();
-    closeModal();
-  }
-
-  function getLeads() {
-    return JSON.parse(localStorage.getItem("leads") || "[]");
-  }
-
-  function filterLeads() {
-    const searchTerm = document.getElementById("search-input").value.toLowerCase();
-    renderLeads(searchTerm);
-  }
-
-  function renderLeads(searchTerm = "") {
-    const tbody = document.querySelector("#lead-table tbody");
-    tbody.innerHTML = "";
-    const leads = getLeads();
-    let open = 0, closed = 0;
-
-    leads.forEach((lead, index) => {
-      const fullText = `${lead.name} ${lead.phone} ${lead.product} ${lead.status} ${lead.comment || ''}`.toLowerCase();
-      if (fullText.includes(searchTerm)) {
-        if (lead.status.toLowerCase() === "open") open++;
-        else closed++;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-  <td colspan="4" class="cardinter">
-    <div class="lead-card ${document.body.classList.contains("dark-mode") ? 'dark-lead-card' : ''}">
-      <div class="lead-row" >
-        <div class="lead-col name"><strong>${lead.name}</strong></div>
-        <div class="lead-col phone">${lead.phone}</div>
-        <div class="lead-col product">${lead.product}</div>
-        <div class="lead-col status">
-          <span class="status-${lead.status.toLowerCase()}" onclick="openLeadForm(${index})">${lead.status}</span>
+        <div class="header">
+            <div>
+                <i class="fas fa-location-arrow"></i>
+            </div>
+            <div id="theme-toggle" class="theme-btn">
+                <i class="far fa-moon"></i>
+            </div>
         </div>
-      </div>
-      ${lead.comment ? `<div class="comment">${lead.comment}</div>` : ''}
+        <!-- HEADER STATS BOX -->
+        <div class="stats">
+            <div class="stat-box">
+                <span class="stat-total">Total Lead</span>
+                <span id="total-count">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-open">Open Lead</span>
+                <span id="open-count">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-closed">Closed Lead</span>
+                <span id="closed-count">0</span>
+            </div>
+        </div>
+        <!-- HEADER ACTION BUTTONS -->
+        <div class="controls">
+            <button onclick="openLeadForm()">Add Lead</button>
+            <input type="text" id="search-input" placeholder="Search lead..." oninput="filterLeads()" style="padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; width: 200px;">
+        </div>
+        <!-- LEAD BOX -->
+        <div class="table-container">
+            <table id="lead-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal" id="leadModal">
+            <div class="modal-content">
+                <input type="text" id="lead-name" placeholder="Name" />
+                <input type="text" id="lead-phone" placeholder="Phone" />
+                <input type="text" id="lead-product" placeholder="Product" />
+                <select id="lead-status">
+                    <option value="Open">Open</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <textarea id="lead-comment" rows="3" placeholder="Comment (optional)"></textarea>
+                <button onclick="saveLead()">Generate Lead</button>
+                <button onclick="deleteLead()" id="delete-btn" style="background: #e60000;">Delete Lead</button>
+            </div>
+        </div>
+
+        <!-- MENU BOX -->
+        <div id="locationMenu" class="location-popup hidden">
+            <div class="menu-item" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </div>
+            <div class="menu-item" onclick="exportToPDF()"></i>
+                <i class="fas fa-file-pdf"></i> Export to Pdf
+            </div>
+        </div>
+
     </div>
-  </td>
-`;    
-        tbody.appendChild(row);
-      }
-    });
+    <!-- FOOTER START -->
+    <footer>
+        <div class="footer-content">
+            <h1>Made With Love <i class="fas fa-heart"></i></h1>
+        </div>
+    </footer>
+    <!-- FOOTER ENDS -->
 
-    document.getElementById("total-count").textContent = open + closed;
-    document.getElementById("open-count").textContent = open;
-    document.getElementById("closed-count").textContent = closed;
-  }
-
-  window.onload = function () {
-    loadTheme();
-    renderLeads();
-  };
-
-  window.addEventListener("click", e => {
-    if (e.target === document.getElementById("leadModal")) {
-      closeModal();
-    }
-  });
-  const locationIcon = document.querySelector('.fa-location-arrow');
-const locationMenu = document.getElementById('locationMenu');
-
-locationIcon.addEventListener('click', (e) => {
-  e.stopPropagation();
-  locationMenu.classList.toggle('hidden');
-});
-
-window.addEventListener('click', (e) => {
-  if (!locationMenu.contains(e.target)) {
-    locationMenu.classList.add('hidden');
-  }
-});
-
-<!-- export to excel -->
-function exportToExcel() {
-  const leads = getLeads();
-  if (leads.length === 0) {
-    alert("No leads to export!");
-    return;
-  }
-
-  const wb = XLSX.utils.book_new();
-  const now = new Date();
-  const dateStr = now.toLocaleDateString();
-  const timeStr = now.toLocaleTimeString();
-
-  const data = [
-    ["Data Till Date", dateStr],
-    ["Time", timeStr],
-    [], // A3 blank
-    ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"],
-  ];
-
-  leads.forEach((lead, index) => {
-    data.push([
-      index + 1,
-      lead.name,
-      lead.phone,
-      lead.product,
-      lead.comment || "",
-      lead.status
-    ]);
-  });
-
-  const ws = XLSX.utils.aoa_to_sheet(data);
-
-  // Header styling (A4 to F4)
-  const headerCells = ["A4", "B4", "C4", "D4", "E4", "F4"];
-  headerCells.forEach(cell => {
-    if (!ws[cell]) return;
-    ws[cell].s = {
-      fill: {
-        patternType: "solid",
-        fgColor: { rgb: "D9EAD3" } // Light green
-      },
-      alignment: {
-        horizontal: "center"
-      },
-      font: {
-        bold: "true"
-      }
-    };
-  });
-
-  // Status cell coloring (column F starting from row 5)
-  for (let i = 0; i < leads.length; i++) {
-    const status = leads[i].status?.toLowerCase();
-    const cellRef = `F${i + 5}`; // Starts from row 5
-    if (!ws[cellRef]) continue;
-
-    ws[cellRef].s = {
-      fill: {
-        patternType: "solid",
-        fgColor: { rgb: status === "open" ? "F4CCCC" : "D9EAD3" } // red for open, green for closed
-      },
-      alignment: {
-        horizontal: "center"
-      },
-      font: {
-        color: { rgb: "000000" },
-        bold: true
-      }
-    };
-  }
-
-  // Column widths
-  const wscols = [
-    { wch: 10 }, // Sr No.
-    { wch: 20 }, // Name
-    { wch: 15 }, // Phone No.
-    { wch: 20 }, // Product
-    { wch: 25 }, // Remark
-    { wch: 10 }, // Status
-  ];
-  ws['!cols'] = wscols;
-
-  XLSX.utils.book_append_sheet(wb, ws, "Leads");
-  XLSX.writeFile(wb, `Leads_${dateStr.replace(/\//g, '-')}.xlsx`);
-}
-
-<!-- share to pdf -->
-function sharePDF() {
-  const leads = getLeads();
-  if (leads.length === 0) {
-    alert("No leads to share!");
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const now = new Date();
-  const dateStr = now.toLocaleDateString();
-  const timeStr = now.toLocaleTimeString();
-  const fileName = `Leads_${dateStr.replace(/\//g, '-')}_${timeStr.replace(/:/g, '-')}.pdf`;
-
-  // Optional: Add a logo
-  const logoImg = new Image();
-  logoImg.crossOrigin = "Anonymous";
-  logoImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqbja7rslLjXRoXZdaH0MH5a971bbL0LQT_9levYNfSFogkgGDJQiBgNmY&s=10';
-
-  logoImg.onload = () => {
-    doc.addImage(logoImg, 'PNG', 140, 10, 50, 15);
-    doc.setFontSize(12);
-    doc.text("Data Till Date:", 15, 18);
-    doc.text(dateStr, 50, 18);
-    doc.text("Time:", 15, 25);
-    doc.text(timeStr, 50, 25);
-
-    const tableColumn = ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"];
-    const tableRows = leads.map((lead, index) => [
-      index + 1,
-      lead.name,
-      lead.phone,
-      lead.product || "-",
-      lead.comment || "-",
-      lead.status
-    ]);
-
-    doc.autoTable({
-      startY: 35,
-      head: [tableColumn],
-      body: tableRows,
-      styles: {
-        halign: 'left',
-        fontSize: 10
-      },
-      headStyles: {
-        fillColor: [217, 234, 211],
-        textColor: 0,
-        fontStyle: 'bold'
-      },
-      didParseCell: function (data) {
-        if (data.section === 'body' && data.column.index === 5) {
-          const status = data.cell.text[0].toLowerCase();
-          if (status === 'open') {
-            data.cell.styles.fillColor = [244, 204, 204];
-          } else if (status === 'closed') {
-            data.cell.styles.fillColor = [217, 234, 211];
+    <!-- SCRIPT START -->
+    <script>
+        let editIndex = null;
+        
+        const toggle = document.getElementById("theme-toggle");
+        toggle.addEventListener("click", () => {
+          const isDark = document.body.classList.toggle("dark-mode");
+          toggle.classList.toggle("dark", isDark);
+          localStorage.setItem("theme", isDark ? "dark" : "light");
+        });
+        
+        function loadTheme() {
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme === "dark") {
+            document.body.classList.add("dark-mode");
+            toggle.classList.add("dark");
           }
         }
-      },
-      didDrawPage: function (data) {
-        const pageHeight = doc.internal.pageSize.height;
-        doc.setFontSize(10);
-        doc.text("Made with Love", 14, pageHeight - 10);
-        doc.text("Page " + doc.internal.getNumberOfPages(), doc.internal.pageSize.width - 30, pageHeight - 10);
-      }
-    });
+        
+        function openLeadForm(index = null) {
+        editIndex = index;
+        const modal = document.getElementById("leadModal");
+        
+        if (leadModal) {
+          leadModal.style.display = "flex";
+        } else {
+          console.error('Modal element not found. Check if id="Modal" exists in your HTML.');
+          return;
+        }
+        
+        if (index !== null) {
+          const leads = getLeads();
+          const lead = leads[index];
+          document.getElementById("lead-name").value = lead.name;
+          document.getElementById("lead-phone").value = lead.phone;
+          document.getElementById("lead-product").value = lead.product;
+          document.getElementById("lead-status").value = lead.status;
+          document.getElementById("lead-comment").value = lead.comment || '';
+          document.getElementById("delete-btn").style.display = "inline-block";
+        } else {
+          document.getElementById("lead-name").value = "";
+          document.getElementById("lead-phone").value = "";
+          document.getElementById("lead-product").value = "";
+          document.getElementById("lead-status").value = "Open";
+          document.getElementById("lead-comment").value = "";
+          document.getElementById("delete-btn").style.display = "none";
+        }
+        }
+        
+        function closeModal() {
+          document.getElementById("leadModal").style.display = "none";
+        }
+        
+        function validatePhoneNumber(phone) {
+          const phonePattern = /^[0-9]{10}$/;
+          return phonePattern.test(phone);
+        }
+        
+        function saveLead() {
+          const name = document.getElementById("lead-name").value.trim();
+          const phone = document.getElementById("lead-phone").value.trim();
+          const product = document.getElementById("lead-product").value.trim();
+          const status = document.getElementById("lead-status").value;
+          const comment = document.getElementById("lead-comment").value.trim();
+        
+          if (!name || !phone || !product || !status) {
+            alert("All fields are required.");
+            return;
+          }
+        
+          if (!validatePhoneNumber(phone)) {
+            alert("Please enter a valid 10-digit phone number.");
+            return;
+          }
+        
+          const leads = getLeads();
+          const newLead = { name, phone, product, status, comment };
+        
+          if (editIndex !== null) {
+            leads[editIndex] = newLead;
+          } else {
+            leads.push(newLead);
+          }
+        
+          localStorage.setItem("leads", JSON.stringify(leads));
+          renderLeads();
+          closeModal();
+        }
+        
+        <!-- DELETE LEAD FUNCTION -->
+        function deleteLead() {
+          if (!confirm("Are you sure you want to delete this lead?")) return;
+        
+          const leads = getLeads();
+          leads.splice(editIndex, 1);
+          localStorage.setItem("leads", JSON.stringify(leads));
+          renderLeads();
+          closeModal();
+        }
+        function getLeads() {
+          return JSON.parse(localStorage.getItem("leads") || "[]");
+        }
+        function filterLeads() {
+          const searchTerm = document.getElementById("search-input").value.toLowerCase();
+          renderLeads(searchTerm);
+        }
+        
+        function renderLeads(searchTerm = "") {
+          const tbody = document.querySelector("#lead-table tbody");
+          tbody.innerHTML = "";
+          const leads = getLeads();
+          let open = 0, closed = 0;
+        
+          leads.forEach((lead, index) => {
+            const fullText = `${lead.name} ${lead.phone} ${lead.product} ${lead.status} ${lead.comment || ''}`.toLowerCase();
+            if (fullText.includes(searchTerm)) {
+              if (lead.status.toLowerCase() === "open") open++;
+              else closed++;
+        
+              const row = document.createElement("tr");
+              row.innerHTML = `
+        <td colspan="4" class="cardinter">
+          <div class="lead-card ${document.body.classList.contains("dark-mode") ? 'dark-lead-card' : ''}">
+            <div class="lead-row" >
+              <div class="lead-col name"><strong>${lead.name}</strong></div>
+              <div class="lead-col phone">${lead.phone}</div>
+              <div class="lead-col product">${lead.product}</div>
+              <div class="lead-col status">
+                <span class="status-${lead.status.toLowerCase()}" onclick="openLeadForm(${index})">${lead.status}</span>
+              </div>
+            </div>
+            ${lead.comment ? `<div class="comment">${lead.comment}</div>` : ''}
+          </div>
+        </td>
+        `;    
+              tbody.appendChild(row);
+            }
+          });
+        
+          document.getElementById("total-count").textContent = open + closed;
+          document.getElementById("open-count").textContent = open;
+          document.getElementById("closed-count").textContent = closed;
+        }
+        
+        window.onload = function () {
+          loadTheme();
+          renderLeads();
+        };
+        
+        window.addEventListener("click", e => {
+          if (e.target === document.getElementById("leadModal")) {
+            closeModal();
+          }
+        });
+        const locationIcon = document.querySelector('.fa-location-arrow');
+        const locationMenu = document.getElementById('locationMenu');
+        
+        locationIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        locationMenu.classList.toggle('hidden');
+        });
+        
+        window.addEventListener('click', (e) => {
+        if (!locationMenu.contains(e.target)) {
+          locationMenu.classList.add('hidden');
+        }
+        });
+        
+        
+        <!-- EXPORT TO EXCEL -->
+        
+        function exportToExcel() {
+        const leads = getLeads();
+        if (leads.length === 0) {
+          alert("No leads to export!");
+          return;
+        }
+        
+        const wb = XLSX.utils.book_new();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString();
+        const timeStr = now.toLocaleTimeString();
+        
+        const data = [
+          ["Data Till Date", dateStr],
+          ["Time", timeStr],
+          [],
+          ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"],
+        ];
+        
+        leads.forEach((lead, index) => {
+          data.push([
+            index + 1,
+            lead.name,
+            lead.phone,
+            lead.product,
+            lead.comment || "",
+            lead.status,
+          ]);
+        });
+        
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        
+        // Optional: Styling, widths, etc.
+        const wscols = [
+          { wch: 10 },
+          { wch: 20 },
+          { wch: 15 },
+          { wch: 20 },
+          { wch: 25 },
+          { wch: 10 },
+        ];
+        ws['!cols'] = wscols;
+        
+        XLSX.utils.book_append_sheet(wb, ws, "Leads");
+        
+        // Convert to binary and trigger manual download
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        const blob = new Blob([wbout], { type: "application/octet-stream" });
+        
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Leads_${dateStr.replace(/\//g, '-')}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        }
+        
+        
+        <!-- export to pdf -->
 
-    const pdfBlob = doc.output("blob");
-    const file = new File([pdfBlob], fileName, { type: "application/pdf" });
-    const shareText = `Sharing Lead Summary PDF\nDate: ${dateStr}\nTime: ${timeStr}`;
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        title: "Lead Report",
-        text: shareText,
-        files: [file],
-      }).catch(err => console.error("Share failed:", err));
-    } else {
-      alert("Your device does not support file sharing. Please use download/export instead.");
-    }
-  };
-}
-</script>
+        function exportToPDF() {
+        const leads = getLeads();
+        if (leads.length === 0) {
+          alert("No leads to export!");
+          return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const now = new Date();
+        const dateStr = now.toLocaleDateString();
+        const timeStr = now.toLocaleTimeString();
+        
+        doc.setFontSize(12);
+        doc.text("Data Till Date:", 14, 20);
+        doc.text(dateStr, 60, 20);
+        doc.text("Time:", 14, 28);
+        doc.text(timeStr, 60, 28);
+        
+        const tableColumn = ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"];
+        const tableRows = leads.map((lead, index) => [
+          index + 1,
+          lead.name,
+          lead.phone,
+          lead.product || "-",
+          lead.comment || "-",
+          lead.status
+        ]);
+        
+        doc.autoTable({
+          startY: 35,
+          head: [tableColumn],
+          body: tableRows,
+          styles: {
+            halign: 'center',
+            fontSize: 10
+          },
+          headStyles: {
+            fillColor: [217, 234, 211],
+            textColor: 0,
+            fontStyle: 'bold'
+          },
+          didParseCell: function (data) {
+            if (data.section === 'body' && data.column.index === 5) {
+              if (data.cell.text[0].toLowerCase() === 'open') {
+                data.cell.styles.fillColor = [244, 204, 204];
+              } else if (data.cell.text[0].toLowerCase() === 'closed') {
+                data.cell.styles.fillColor = [217, 234, 211];
+              }
+            }
+          },
+          didDrawPage: function (data) {
+            const pageHeight = doc.internal.pageSize.height;
+            doc.setFontSize(10);
+            doc.text("Generated by Lead Manager", 14, pageHeight - 10);
+            doc.text("Page " + doc.internal.getNumberOfPages(), doc.internal.pageSize.width - 30, pageHeight - 10);
+          }
+        });
+        
+        // Use blob to safely trigger file download
+        const pdfBlob = doc.output("blob");
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Leads_${dateStr.replace(/\//g, '-')}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        }
+    </script>
 </body>
 </html>
