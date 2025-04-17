@@ -157,7 +157,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: white;
+  background: #ffffff8f;
+  backdrop-filter: blur(25px);
   border-bottom: 3px dotted #787878;
   position: sticky;
   top: 0;
@@ -167,7 +168,8 @@ body {
 .dark-mode .header,
 .dark-mode .controls,
 .dark-mode .stats {
-  background: #2b2b2b;
+  background: #0000008f;
+  backdrop-filter: blur(25px);
 }
 
 .toggle {
@@ -198,7 +200,8 @@ body {
   display: flex;
   justify-content: space-around;
   padding: 1rem;
-  background: white;
+  background: #ffffff8f;
+  backdrop-filter: blur(25px);
   border-bottom: 1px solid #ccc;
   position: sticky;
   top: 81px; /* Adjust based on .header height */
@@ -226,7 +229,8 @@ body {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 1rem;
-  background: white;
+  background: #ffffff8f;
+  backdrop-filter: blur(25px);
   position: sticky;
   top: 160px; /* Adjust based on combined height of .header + .stats */
   z-index: 900;
@@ -422,7 +426,8 @@ footer {
   position: absolute;
   top: 80px; /* adjust based on your header height */
   right: 20px; /* align near your location icon */
-  background: white;
+  background: #ffffffe0;
+  backdrop-filter: blur(10px);
   border-radius: 25px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   color: black;
@@ -432,7 +437,7 @@ footer {
   z-index: 999;
   width: 160px;
   width: 90%;
-  min-height: 250px;
+  min-height: 130px;
   max-height: 40%;
 }
 
@@ -760,8 +765,9 @@ footer {
         }
         
         
+        
         <!-- export to pdf -->
-
+        
         function exportToPDF() {
         const leads = getLeads();
         if (leads.length === 0) {
@@ -834,4 +840,5 @@ footer {
         }
     </script>
 </body>
+
 </html>
