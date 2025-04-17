@@ -12,6 +12,7 @@
   <script src="https://kit.fontawesome.com/520b138994.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.8.0/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
   .poppins-thin {
   font-family: "Poppins", sans-serif;
@@ -454,7 +455,7 @@ footer{
   </div>
 
   <div class="controls">
-    <button onclick="openLeadForm()">Add Lead</button>
+    <button onclick="openLeadForm()"><i class="fas fa-plus"></i> Add Lead</button>
     <input type="text" id="search-input" placeholder="Search lead..." oninput="filterLeads()" style="padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; width: 200px;">
   </div>
 
@@ -490,6 +491,9 @@ footer{
   </div>
   
   <div id="locationMenu" class="location-popup hidden">
+  <div class="menu-item" onclick="exportToExcel()">
+    <i class="fas fa-file-excel"></i> Export to Excel
+  </div>
   <div class="menu-item" onclick="sharePDF()">
   <i class="fas fa-file-pdf"></i> Share as PDF
 </div>
@@ -672,6 +676,93 @@ window.addEventListener('click', (e) => {
     locationMenu.classList.add('hidden');
   }
 });
+
+<!-- export to excel -->
+function exportToExcel() {
+  const leads = getLeads();
+  if (leads.length === 0) {
+    alert("No leads to export!");
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString();
+  const timeStr = now.toLocaleTimeString();
+
+  const data = [
+    ["Data Till Date", dateStr],
+    ["Time", timeStr],
+    [], // A3 blank
+    ["Sr No.", "Name", "Phone No.", "Products", "Remark", "Status"],
+  ];
+
+  leads.forEach((lead, index) => {
+    data.push([
+      index + 1,
+      lead.name,
+      lead.phone,
+      lead.product,
+      lead.comment || "",
+      lead.status
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+
+  // Header styling (A4 to F4)
+  const headerCells = ["A4", "B4", "C4", "D4", "E4", "F4"];
+  headerCells.forEach(cell => {
+    if (!ws[cell]) return;
+    ws[cell].s = {
+      fill: {
+        patternType: "solid",
+        fgColor: { rgb: "D9EAD3" } // Light green
+      },
+      alignment: {
+        horizontal: "center"
+      },
+      font: {
+        bold: "true"
+      }
+    };
+  });
+
+  // Status cell coloring (column F starting from row 5)
+  for (let i = 0; i < leads.length; i++) {
+    const status = leads[i].status?.toLowerCase();
+    const cellRef = `F${i + 5}`; // Starts from row 5
+    if (!ws[cellRef]) continue;
+
+    ws[cellRef].s = {
+      fill: {
+        patternType: "solid",
+        fgColor: { rgb: status === "open" ? "F4CCCC" : "D9EAD3" } // red for open, green for closed
+      },
+      alignment: {
+        horizontal: "center"
+      },
+      font: {
+        color: { rgb: "000000" },
+        bold: true
+      }
+    };
+  }
+
+  // Column widths
+  const wscols = [
+    { wch: 10 }, // Sr No.
+    { wch: 20 }, // Name
+    { wch: 15 }, // Phone No.
+    { wch: 20 }, // Product
+    { wch: 25 }, // Remark
+    { wch: 10 }, // Status
+  ];
+  ws['!cols'] = wscols;
+
+  XLSX.utils.book_append_sheet(wb, ws, "Leads");
+  XLSX.writeFile(wb, `Leads_${dateStr.replace(/\//g, '-')}.xlsx`);
+}
 
 <!-- share to pdf -->
 function sharePDF() {
