@@ -435,10 +435,10 @@ footer {
   font-weight: bold;
   font-size: 17px;
   z-index: 999;
-  width: 160px;
+  
   width: 90%;
   min-height: 130px;
-  max-height: 40%;
+  max-height: auto;
 }
 
 .location-popup .menu-item {
@@ -522,11 +522,11 @@ footer {
             <div class="menu-item" onclick="exportToExcel()">
                 <i class="fas fa-file-excel"></i> Export to Excel
             </div>
-            <div class="menu-item" onclick="exportToPDF()"></i>
+            <div class="menu-item" onclick="exportToPDF()">
                 <i class="fas fa-file-pdf"></i> Export to Pdf
             </div>
-          <div class="menu-item""></i>
-                <i class="fas fa-database"></i> Add Sales Data
+          <div class="menu-item"">
+                <i class="fas fa-database"></i><a href="#"> Add Sales Data </a>
           </div>
         </div>
 
