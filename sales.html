@@ -1,0 +1,565 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Report</title>
+  <!-- links css -->
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-duotone-thin.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-duotone-solid.css">
+  <!-- font 1 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+RO:wght@100..400&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    :root {
+      --bg-color: #f9f9f9;
+      --text-color: #111;
+      --card-bg: #fff;
+      --button-bg: #007aff;
+      --modal-bg: #ffffff;
+      --transparent-bg: #ffffff81;
+      --search: #00000027;
+      --pink: #2b58ff5d;
+      --bt-textclr: #0057ff;
+    }
+    .dark-mode {
+  --bg-color: #1e1e1e;
+  --text-color: #eee;
+  --card-bg: #2b2b2b;
+  --button-bg: #007aff;
+  --modal-bg: #2b2b2b;
+  --transparent-bg: #00000081;
+  --search: #ffffff27;
+  --bt-textclr: #d995ff;
+}
+
+.playwrite-ro-<uniquifier> {
+  font-family: "Playwrite RO", cursive;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
+.fa-heart, footer h1 {
+  background: linear-gradient(to right, #ff0088aa, #feb47b); /* Adjust colors */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  transition: .5s ease;
+}
+.head{
+    padding: 15px 10px;
+    position: sticky;
+    width: 100%;
+    height: 150px;
+    background: var(--transparent-bg);
+    backdrop-filter: blur(17px);
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+.stats {
+  display: block;
+  gap: 0rem;
+  border-radius: 0px;
+  margin-bottom: 1.5rem;
+  padding: 7px;
+  background: var(--card-bg);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  position: sticky;
+  top: 40px; /* below header */
+  z-index: 998;
+}
+.card {
+  padding: 8px;
+  display: flex;
+  
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+#menu-toggle i {
+  padding: 0px 6px;
+  color: #0081ff;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: #0081ff;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.controls {
+  display: ;
+  color: var(--text-color);
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(70px);
+  background: var(--search);
+  width: 100%;
+  border-radius: 18px;
+  padding: 3px 10px;
+  font-size: 18px;
+  line-height: 28px;
+  border: 0px solid #45454582;
+}
+
+.controls input[type="text"] {
+  padding: 0.75rem;
+  border: none;
+  font-size: 15px;
+  background: none;
+  outline: none;
+  width: 80%;
+}
+.controls i{
+    width: 10%;
+    height: 30px;
+    line-height: 30px;
+    padding: 6px 0px 0px 9px;
+}
+.controls button,
+.modal-content button.save,
+#manual-search {
+  padding: 0.75rem;
+  background-color: var(--button-bg);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.table-container {
+  overflow-x: auto;
+  padding: 10px 10px;
+}
+.thead{
+    background: var(--bg-color);
+}
+thead.thead th {
+  position: sticky;
+  top: 0; /* head (150px) + stats (60px estimated with margin) */
+  background: var(--card-bg);
+  z-index: 997;
+  border-radius: 30px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  min-width: 600px;
+  border-radius: 20px;
+  box-shadow: 0px 0px 10px #898989d1;
+  
+}
+
+th, td {
+  padding: .7rem;
+  text-align: left;
+  border-top: 1px solid #ccc;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: var(--modal-bg);
+  padding: 1.5rem;
+  border-radius: 16px;
+  width: 80%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.modal-content input {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.product-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modal-content button.delete {
+  background-color: #ff3b30;
+  color: white;
+  border: none;
+  outline: none;
+  border-radius: 15px;
+  padding: 8px 10px;
+}
+
+#reader-wrapper {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  justify-content: center;
+}
+
+#reader {
+  width: 100%;
+  max-width: 300px;
+}
+
+#close-scan {
+  margin-top: 0.5rem;
+  background: #ccc;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+.scan{
+    background: #006cff;
+    outline: none; 
+    border: none; 
+    border-radius: 10px;
+    padding: 0px 15px;
+    height: 42px;
+    color: white;
+    font-weight: bold;
+}
+@media (max-width: 600px) {
+  .stats {
+    flex-direction: column;
+  }
+  .controls {
+    flex-direction: column;
+  }
+  .modal-content {
+    width: 95%;
+  }
+}
+
+#AddButton {
+  background: none;
+  font-size: 20px;
+  border: none;
+  outline: none;
+  padding: 0px 20px;
+  color: #0081ff;
+}
+
+.icon-img{
+    height: 32px;
+    width: 32px;
+    border-radius: 6px;
+}
+.card section{
+    padding: 0px 8px;
+}
+footer h1{
+    font-size: 60px;
+    padding: 1ppx;
+    color: var(--pink);
+    font-family: "Playwrite RO", cursive;
+    font-size: 70px;
+    text-align: center;
+}
+footer p{
+    color: var(--bt-textclr);
+    font-family: "Playwrite RO", cursive;
+    font-size: 15px;
+    text-align: center;
+    padding-top: 20px;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+  </style>
+</head>
+<body>
+    <div class="head">
+  <header>
+  <button id="menu-toggle" style="background: none; border: none; font-size: 24px; cursor: pointer; display: flex;">
+      <i class="fa-solid fa-chevron-left"></i>
+      <i class="fa-solid fa-circle-user"></i>
+  </button>
+  <p style="font-size: 18px;line-height: 28px;">Sale Report</p>
+ 
+  <nav id="nav-menu" style="display:none; position:absolute; top:60px; left: 14px;; background:white; border:1px solid #ddd; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); z-index:10001; min-width: 160px;">
+    <ul style="list-style:none; padding:10px; margin:0;">
+      <li><label style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="theme-toggle"> Dark Mode
+      </label></li>
+      <li><button onclick="exportToExcel()" style="margin-top: 10px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">Export to Excel</button></li>
+    </ul>
+  </nav>
+  <button onclick="openModal()" id="AddButton" style="color: #0081ff;">
+      <i class="far fa-add"></i>
+      
+  </button>
+</header>
+<div class="controls">
+    <i class="fas fa-search"></i>
+    <input type="text" id="search-input" placeholder="Search Sale..." oninput="filterSales()">
+  </div>
+  </div>
+  <div class="stats">
+    <div class="card">
+      <img src="https://aroundsketch.com/Apple-App-Icons/App-Icon/Apple/Classroom/@SVG.svg" alt="" class="icon-img">
+      <section>
+      <div>Total Sales</div>
+       <strong id="total-count">0</strong>
+      </section>
+    </div>
+    <div class="card">
+      <img src="https://aroundsketch.com/Apple-App-Icons/App-Icon/Apple/Calculator/@SVG.svg" alt="" class="icon-img">
+      <section>
+      <div>Total Sale Value</div>
+      <strong id="total-value">0</strong>
+      </section>
+    </div>
+    <div class="card">
+      <img src="https://aroundsketch.com/Apple-App-Icons/App-Icon/Apple/Health/@SVG.svg" alt="" class="icon-img">
+      <section>
+      <div>Total RCP</div>
+      <strong id="rcp-count">0</strong>
+      </section>
+    </div>
+  </div>  
+ 
+  <div class="table-container">
+    <table>
+      <thead class="thead">
+        <tr class="tr">
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Product</th>
+          <th>Sale</th>
+          <th>RCP</th>
+        </tr>
+      </thead>
+      <tbody id="sales-body"></tbody>
+    </table>
+  </div>  <div class="modal" id="saleModal">
+    <div class="modal-content">
+      <input type="text" id="name" placeholder="Name">
+      <input type="text" id="phone" placeholder="Phone" oninput="validateNumberInput(this, 13)">
+      <div class="product-row">
+        <input type="text" id="product" placeholder="Product">
+        <button type="button" class="scan" onclick="startScan()">Scan</button>
+      </div>
+      <input type="text" id="sale" placeholder="Sale" oninput="validateNumberInput(this)">
+      <input type="text" id="rcp" placeholder="RCP" oninput="validateNumberInput(this)">
+      <button class="save" onclick="saveSale()">Save</button>
+      <button class="delete" id="delete-btn" onclick="deleteSale()" style="display:none;">Delete</button>
+    </div>
+  </div>  
+
+<div id="reader-wrapper">
+  <div id="reader"></div>
+  <input type="text" id="manual-ean" placeholder="Enter EAN manually" style="margin-top: 0.75rem; padding: 0.5rem; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid #ccc;">
+  <button id="manual-search" onclick="manualSearch()" style="margin-top: 0.5rem; background-color: #007aff; color: white; border: none; border-radius: 6px; padding: 0.5rem 1rem; cursor: pointer;">Search</button>
+  <button id="close-scan" onclick="stopScan()" style="margin-top: 0.5rem; background: #ccc; border-radius: 6px; padding: 0.5rem 1rem; border: none; cursor: pointer;">Close</button>
+</div>
+
+<footer>
+    <p>====== End of the Report ======</p>
+    <h1><i class="fas fa-heart"></i></h1>
+</footer>
+
+
+   <script>
+  let sales = [], editIndex = null, workbookData = [];
+
+  // Load Google Sheet as CSV
+  function loadStockFile() {
+    fetch("https://docs.google.com/spreadsheets/d/1Es0SEOINmzGHBhoAcuVt9CD2s5Zc8DZz/export?format=csv")
+      .then(res => res.text())
+      .then(csv => {
+        const rows = csv.split('\n').map(row => row.split(','));
+        workbookData = rows;
+      });
+  }
+
+  function openModal(index = null) {
+    editIndex = index;
+    document.getElementById("saleModal").style.display = "flex";
+    document.getElementById("delete-btn").style.display = index !== null ? "block" : "none";
+    if (index !== null) {
+      const sale = sales[index];
+      document.getElementById("name").value = sale.name;
+      document.getElementById("phone").value = sale.phone;
+      document.getElementById("product").value = sale.product;
+      document.getElementById("sale").value = sale.sale;
+      document.getElementById("rcp").value = sale.rcp;
+    } else {
+      document.querySelectorAll(".modal-content input").forEach(i => i.value = "");
+    }
+  }
+
+  function closeModal() {
+    document.getElementById("saleModal").style.display = "none";
+  }
+
+  function validateNumberInput(input, max = null) {
+    input.value = input.value.replace(/\D/g, '');
+    if (max && input.value.length > max) input.value = input.value.slice(0, max);
+  }
+
+  function saveSale() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const product = document.getElementById("product").value.trim();
+  const sale = document.getElementById("sale").value.trim();
+  const rcp = document.getElementById("rcp").value.trim();
+  if (!name || !phone || !product || !sale || !rcp) return alert("All fields required.");
+  if (phone.length < 10 || phone.length > 13) return alert("Phone must be 10-13 digits.");
+
+  const date = new Date().toLocaleDateString(); // Get current date
+
+  const entry = { name, phone, product, sale, rcp, date };
+  if (editIndex !== null) sales[editIndex] = entry;
+  else sales.push(entry);
+
+  localStorage.setItem("sales", JSON.stringify(sales));
+  renderSales();
+  closeModal();
+}
+
+  function deleteSale() {
+    if (editIndex !== null && confirm("Delete this sale?")) {
+      sales.splice(editIndex, 1);
+      localStorage.setItem("sales", JSON.stringify(sales));
+      renderSales();
+      closeModal();
+    }
+  }
+
+  function renderSales(filter = "") {
+    const body = document.getElementById("sales-body");
+    body.innerHTML = "";
+    let total = 0, rcpSum = 0;
+    sales.forEach((s, i) => {
+      const text = Object.values(s).join(" ").toLowerCase();
+      if (text.includes(filter.toLowerCase())) {
+        total += +s.sale || 0;
+        rcpSum += +s.rcp || 0;
+        const row = body.insertRow();
+        row.innerHTML = `<td>${s.name}</td><td>${s.phone}</td><td>${s.product}</td><td>${s.sale}</td><td>${s.rcp}</td>`;
+        row.onclick = () => openModal(i);
+      }
+    });
+    document.getElementById("total-count").textContent = sales.length;
+    document.getElementById("total-value").textContent = total.toFixed(2);
+    document.getElementById("rcp-count").textContent = rcpSum.toFixed(2);
+  }
+
+  function filterSales() {
+    renderSales(document.getElementById("search-input").value);
+  }
+
+  let scanner;
+  function startScan() {
+    scanner = new Html5Qrcode("reader");
+    document.getElementById("reader-wrapper").style.display = "flex";
+    scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+      (text) => {
+        scanner.stop();
+        document.getElementById("reader-wrapper").style.display = "none";
+        const match = workbookData.find(row => row[1] == text);
+        if (match) document.getElementById("product").value = match[2] || "";
+        else alert("Product not found.");
+      }, err => {});
+  }
+
+  function stopScan() {
+    if (scanner) scanner.stop();
+    document.getElementById("reader-wrapper").style.display = "none";
+  }
+
+  function manualSearch() {
+    const ean = document.getElementById("manual-ean").value.trim();
+    if (!ean) return alert("Please enter a valid EAN number.");
+    const match = workbookData.find(row => row[1] == ean);
+    if (match) {
+      document.getElementById("product").value = match[2] || "";
+      alert("Product found and filled.");
+    } else {
+      alert("Product not found for EAN: " + ean);
+    }
+  }
+
+  window.onload = () => {
+    sales = JSON.parse(localStorage.getItem("sales") || "[]");
+    renderSales();
+    loadStockFile();
+  };
+
+  window.onclick = e => {
+    if (e.target.id === "saleModal") closeModal();
+  };
+   // Toggle nav menu
+  document.getElementById("menu-toggle").addEventListener("click", () => {
+    const nav = document.getElementById("nav-menu");
+    nav.style.display = nav.style.display === "block" ? "none" : "block";
+  });
+
+  // Theme switch
+  window.onload = () => {
+  sales = JSON.parse(localStorage.getItem("sales") || "[]");
+  renderSales();
+  loadStockFile();const isDark = localStorage.getItem("dark-mode") === "true"; document.getElementById("theme-toggle").checked = isDark; document.documentElement.classList.toggle("dark-mode", isDark); };
+
+document.getElementById("theme-toggle").addEventListener("change", (e) => { const isDark = e.target.checked; document.documentElement.classList.toggle("dark-mode", isDark); localStorage.setItem("dark-mode", isDark); });
+
+  // Export to Excel
+  function exportToExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [
+    ["Name", "Phone", "Product", "Sale", "RCP", "Date"], // Added "Date"
+    ...sales.map(s => [s.name, s.phone, s.product, s.sale, s.rcp, s.date || ""])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, "Sales");
+  XLSX.writeFile(wb, "sales_export.xlsx");
+}
+</script>
+ </body>
+  </html>
