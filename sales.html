@@ -493,7 +493,7 @@ a, a:visited, a:hover, a:active {
     const body = document.getElementById("sales-body");
     body.innerHTML = "";
     let total = 0, rcpSum = 0;
-    sales.forEach((s, i) => {
+    sales.reverse().forEach((s, i) => {
       const text = Object.values(s).join(" ").toLowerCase();
       if (text.includes(filter.toLowerCase())) {
         total += +s.sale || 0;
