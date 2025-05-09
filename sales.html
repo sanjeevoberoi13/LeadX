@@ -347,6 +347,7 @@ a, a:visited, a:hover, a:active {
       <li><button onclick="exportToExcel()" style="margin-top: 10px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">Export to Excel</button></li>
       <a href="mailto:sanjeevoberoi@proton.me?subject=Support%20for%20LeadX%20%F0%9F%91%8B%F0%9F%8F%BB&body=Need%20support%20for%20LeadX">
         <li><button onclick="" style="margin-top: 5px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">support</li></a>
+        <li><button onclick="confirmResetSales()" style="margin-top: 5px; width: 100%; padding: 8px; background:#ff3b30; color:white; border:none; border-radius:6px;">Reset Sales</button></li>
     </ul>
   </nav>
   <button onclick="openModal()" id="AddButton" style="color: #0081ff;">
@@ -417,6 +418,28 @@ a, a:visited, a:hover, a:active {
   <button id="manual-search" onclick="manualSearch()" style="margin-top: 0.5rem; background-color: #007aff; color: white; border: none; border-radius: 6px; padding: 0.5rem 1rem; cursor: pointer;">Search</button>
   <button id="close-scan" onclick="stopScan()" style="margin-top: 0.5rem; background: #ccc; border-radius: 6px; padding: 0.5rem 1rem; border: none; cursor: pointer;">Close</button>
 </div>
+<!-- detete Confirm Modal -->
+<div class="modal" id="resetModal">
+  <div class="modal-content">
+    <p style="margin-bottom: 1rem;">Are you sure you want to delete all sales?</p>
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button onclick="proceedReset()" style="background-color:#ff9500; color:white; border:none; border-radius:6px; padding:8px 12px;">Yes</button>
+      <button onclick="closeResetModal()" style="background-color:#ccc; border:none; border-radius:6px; padding:8px 12px;">No</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="confirmModal">
+  <div class="modal-content">
+    <p>Type <b>"confirm"</b> to delete all sales:</p>
+    <input type="text" id="confirm-input" placeholder="Type here...">
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+      <button onclick="deleteAllSales()" style="background-color:#ff3b30; color:white; border:none; border-radius:6px; padding:8px 12px;">Delete</button>
+      <button onclick="closeConfirmModal()" style="background-color:#ccc; border:none; border-radius:6px; padding:8px 12px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
 
 <footer>
     <p>====== End of the Report ======</p>
@@ -492,24 +515,30 @@ a, a:visited, a:hover, a:active {
   }
 
   function renderSales(filter = "") {
-    const body = document.getElementById("sales-body");
-    body.innerHTML = "";
-    let total = 0, rcpSum = 0;
-    sales.reverse().forEach((s, i) => {
-      const text = Object.values(s).join(" ").toLowerCase();
-      if (text.includes(filter.toLowerCase())) {
-        total += +s.sale || 0;
-        rcpSum += +s.rcp || 0;
-        const row = body.insertRow();
-        row.innerHTML = `<td>${s.name}</td><td>${s.phone}</td><td>${s.product}</td><td>${s.sale}</td><td>${s.rcp}</td>`;
-        row.onclick = () => openModal(i);
-      }
-    });
-    document.getElementById("total-count").textContent = sales.length;
-    document.getElementById("total-value").textContent = total.toFixed(2);
-    document.getElementById("rcp-count").textContent = rcpSum.toFixed(2);
-  }
+  const body = document.getElementById("sales-body");
+  body.innerHTML = "";
+  let total = 0, rcpSum = 0;
 
+  const filteredSales = [...sales].reverse().filter(s =>
+    Object.values(s).join(" ").toLowerCase().includes(filter.toLowerCase())
+  );
+
+  filteredSales.forEach((s, i) => {
+    total += +s.sale || 0;
+    rcpSum += +s.rcp || 0;
+    const row = body.insertRow();
+    row.innerHTML = `<td>${s.name}</td><td>${s.phone}</td><td>${s.product}</td><td>${s.sale}</td><td>${s.rcp}</td>`;
+    row.onclick = () => openModal(sales.length - 1 - i); // fix for reverse index
+  });
+
+  const currentCount = parseInt(document.getElementById("total-count").textContent || "0");
+  const currentValue = parseFloat(document.getElementById("total-value").textContent || "0");
+  const currentRCP = parseFloat(document.getElementById("rcp-count").textContent || "0");
+
+  animateValue("total-count", currentCount, sales.length);
+  animateValue("total-value", currentValue, total);
+  animateValue("rcp-count", currentRCP, rcpSum);
+}
   function filterSales() {
     renderSales(document.getElementById("search-input").value);
   }
@@ -578,6 +607,81 @@ document.getElementById("theme-toggle").addEventListener("change", (e) => { cons
   const ws = XLSX.utils.aoa_to_sheet(ws_data);
   XLSX.utils.book_append_sheet(wb, ws, "Sales");
   XLSX.writeFile(wb, "sales_export.xlsx");
+}
+
+<!-- Delete Confirm Function -->
+function confirmResetSales() {
+  document.getElementById("resetModal").style.display = "flex";
+}
+
+function closeResetModal() {
+  document.getElementById("resetModal").style.display = "none";
+}
+
+function proceedReset() {
+  closeResetModal();
+  document.getElementById("confirmModal").style.display = "flex";
+}
+
+function closeConfirmModal() {
+  document.getElementById("confirmModal").style.display = "none";
+}
+
+function deleteAllSales() {
+  const confirmText = document.getElementById("confirm-input").value.trim().toLowerCase();
+  if (confirmText === "confirm") {
+    // Export current sales before deletion
+    if (sales.length > 0) {
+      const wb = XLSX.utils.book_new();
+      const ws_data = [
+        ["Name", "Phone", "Product", "Sale", "RCP", "Date"],
+        ...sales.map(s => [s.name, s.phone, s.product, s.sale, s.rcp, s.date || ""])
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, "Sales");
+
+      // Generate random filename
+      const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const filename = `SALE_EXPORT_${randomStr}.xlsx`;
+      XLSX.writeFile(wb, filename);
+    }
+
+    // Clear sales
+    localStorage.removeItem("sales");
+    sales = [];
+    renderSales();
+    closeConfirmModal();
+    alert("Sales exported and deleted successfully.");
+  } else {
+    alert("You must type 'confirm' to proceed.");
+  }
+}
+
+<!-- rolling animation Function of Numbers-->
+function animateValue(id, oldValue, newValue, duration = 1000) {
+  oldValue = Number(oldValue);
+  newValue = Number(newValue);
+  if (oldValue === newValue) return; // Skip animation if no change
+
+  const obj = document.getElementById(id);
+  const frameCount = Math.round(duration / 16); // ~60fps
+  let frame = 0;
+
+  function update() {
+    frame++;
+    const progress = frame / frameCount;
+    const current = oldValue + (newValue - oldValue) * easeOutQuad(progress);
+    obj.textContent = newValue % 1 === 0
+      ? Math.round(current)
+      : current.toFixed(2);
+    if (frame < frameCount) requestAnimationFrame(update);
+  }
+
+  requestAnimationFrame(update);
+}
+
+function easeOutQuad(t) {
+  return t * (2 - t);
 }
 </script>
  </body>
