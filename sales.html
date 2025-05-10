@@ -14,7 +14,10 @@
   
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
+  <!-- pdf js. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <style>      
     :root {
       --bg-color: #f9f9f9;
       --text-color: #111;
@@ -25,16 +28,37 @@
       --search: #00000027;
       --pink: #2b58ff5d;
       --bt-textclr: #0057ff;
+      --toast-dark: #13e44511;
     }
     .dark-mode {
-  --bg-color: #1e1e1e;
-  --text-color: #eee;
-  --card-bg: #2b2b2b;
-  --button-bg: #007aff;
-  --modal-bg: #2b2b2b;
-  --transparent-bg: #00000081;
-  --search: #ffffff27;
-  --bt-textclr: #d995ff;
+      --bg-color: #1e1e1e;
+      --text-color: #eee;
+      --card-bg: #2b2b2b;
+      --button-bg: #007aff;
+      --modal-bg: #2b2b2b;
+      --transparent-bg: #00000081;
+      --search: #ffffff27;
+      --bt-textclr: #d995ff;
+      --toast-dark: #fffff;
+      }
+<!-- Tap Highlight -->
+*{
+  -webkit-tap-highlight-color: none;
+  -webkit-focus-ring-color: none;
+  outline: none;
+}
+button, input, textarea {
+  outline: none;
+  box-shadow: none;
+}
+<!-- scroll bar -->
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .playwrite-ro-<uniquifier> {
@@ -185,11 +209,11 @@ th, td {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.35); /* slightly lighter */
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px); /* smoother blur */
 }
 
 .modal-content {
@@ -208,6 +232,7 @@ th, td {
   border: 1px solid #ccc;
   border-radius: 10px;
   font-size: 15px;
+  background: none;
 }
 
 .product-row {
@@ -344,7 +369,7 @@ a, a:visited, a:hover, a:active {
       <li><label style="display:flex; align-items:center; gap:8px;">
         <input type="checkbox" id="theme-toggle"> Dark Mode
       </label></li>
-      <li><button onclick="exportToExcel()" style="margin-top: 10px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">Export to Excel</button></li>
+      <li><button onclick="openExportModal()" style="margin-top: 10px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">Export</button></li>
       <a href="mailto:sanjeevoberoi@proton.me?subject=Support%20for%20LeadX%20%F0%9F%91%8B%F0%9F%8F%BB&body=Need%20support%20for%20LeadX">
         <li><button onclick="" style="margin-top: 5px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">support</li></a>
         <li><button onclick="confirmResetSales()" style="margin-top: 5px; width: 100%; padding: 8px; background:#ff3b30; color:white; border:none; border-radius:6px;">Reset Sales</button></li>
@@ -439,8 +464,36 @@ a, a:visited, a:hover, a:active {
     </div>
   </div>
 </div>
+<!-- Export Option Modal -->
+<div class="modal" id="exportModal">
+  <div class="modal-content">
+    <p style="margin-bottom: 1rem;">Choose export format or <span onclick="closeExportModal()" style="color: Red; font-weight: bold;">Click here To Cancel</span></p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button onclick="exportToExcel()" style="background-color:#007aff; color:white; border:none; border-radius:6px; padding:8px 12px;">Excel</button>
+      <button onclick="exportToPDF()" style="background-color:#ff9500; color:white; border:none; border-radius:6px; padding:8px 12px;">PDF</button>
+    </div>
+  </div>
+</div>
 
-
+<!-- Toast Notification -->
+<div id="export-toast" style="
+  position: fixed;
+  top: 40px;
+  right: 90px;
+  background: var(--toast-dark);
+  backdrop-filter: blur(30px);
+  color: var(--text-color);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+  z-index: 9999;
+">
+  PDF exported successfully!
+</div>
 <footer>
     <p>====== End of the Report ======</p>
     <h1><i class="fas fa-heart"></i></h1>
@@ -596,24 +649,149 @@ a, a:visited, a:hover, a:active {
   loadStockFile();const isDark = localStorage.getItem("dark-mode") === "true"; document.getElementById("theme-toggle").checked = isDark; document.documentElement.classList.toggle("dark-mode", isDark); };
 
 document.getElementById("theme-toggle").addEventListener("change", (e) => { const isDark = e.target.checked; document.documentElement.classList.toggle("dark-mode", isDark); localStorage.setItem("dark-mode", isDark); });
+  <!-- open Export Modal -->
+  function openExportModal() {
+  document.getElementById("exportModal").style.display = "flex";
+}
 
-  // Export to Excel
+function closeExportModal() {
+  document.getElementById("exportModal").style.display = "none";
+}
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeExportModal();
+});
+  <!-- // Export to Excel -->
   function exportToExcel() {
+  closeExportModal();
   const wb = XLSX.utils.book_new();
+  const totalSale = sales.reduce((sum, s) => sum + Number(s.sale || 0), 0);
+  const totalRCP = sales.reduce((sum, s) => sum + Number(s.rcp || 0), 0);
+
   const ws_data = [
-    ["Name", "Phone", "Product", "Sale", "RCP", "Date"], // Added "Date"
-    ...sales.map(s => [s.name, s.phone, s.product, s.sale, s.rcp, s.date || ""])
+    ["Name", "Phone", "Product", "Sale", "RCP", "Date"],
+    ...sales.map(s => [s.name, s.phone, s.product, s.sale, s.rcp, s.date || ""]),
   ];
+
+  // Create worksheet
   const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+  // Add Total row at the end
+  const totalRow = [["", "", "Total", totalSale, totalRCP, ""]];
+  XLSX.utils.sheet_add_aoa(ws, totalRow, { origin: -1 });
+
+  // Style header row
+  const headerCells = ["A1", "B1", "C1", "D1", "E1", "F1"];
+  headerCells.forEach(cell => {
+    if (!ws[cell]) return;
+    ws[cell].s = {
+      alignment: { horizontal: "center" },
+      font: { bold: true }
+    };
+  });
+
+  // Style total row (last row)
+  const lastRowIndex = ws_data.length + 1;
+  const totalCells = [`C${lastRowIndex}`, `D${lastRowIndex}`, `E${lastRowIndex}`];
+  totalCells.forEach(cell => {
+    if (!ws[cell]) return;
+    ws[cell].s = {
+      font: { bold: true }
+    };
+  });
+
+  // Export file
   XLSX.utils.book_append_sheet(wb, ws, "Sales");
   XLSX.writeFile(wb, "sales_export.xlsx");
 }
+
+<!-- export to pdf  -->
+function exportToPDF() {
+  closeExportModal();
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+
+  const marginPt = 21.6;
+  const now = new Date();
+
+  const pad = n => String(n).padStart(2, '0');
+  const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const fileName = `SALE_${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.pdf`;
+
+  doc.setFontSize(16);
+  doc.text("SALE REPORT", marginPt, marginPt);
+  doc.setFontSize(10);
+  doc.text(`DATE : ${dateStr}`, marginPt, marginPt + 14);
+  doc.text(`TIME : ${timeStr}`, marginPt, marginPt + 28);
+
+  const sorted = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const rows = sorted.map(s => [
+    s.name || "",
+    s.phone || "",
+    s.product || "",
+    s.sale || "",
+    s.rcp || "",
+    s.date || ""
+  ]);
+
+  const totalSale = sorted.reduce((sum, s) => sum + Number(s.sale || 0), 0);
+  const totalRcp = sorted.reduce((sum, s) => sum + Number(s.rcp || 0), 0);
+  const totalRow = ["", "", "Total", totalSale, totalRcp, ""];
+
+  doc.autoTable({
+    startY: marginPt + 40,
+    head: [["Name", "Phone", "Product", "Sale", "RCP", "Date"]],
+    body: [...rows, totalRow],
+    margin: { left: marginPt, right: marginPt },
+    styles: {
+      fontSize: 9,
+      cellPadding: 2
+    },
+    headStyles: {
+      fillColor: [0, 122, 255],
+      textColor: 255,
+      fontStyle: 'bold'
+    },
+    didParseCell: function (data) {
+      if (data.row.index === rows.length) {
+        data.cell.styles.fontStyle = 'bold';
+      }
+    },
+    didDrawPage: function (data) {
+      const pageCount = doc.internal.getNumberOfPages();
+      const pageCurrent = doc.internal.getCurrentPageInfo().pageNumber;
+      const footerText = `Page ${pageCurrent} of ${pageCount}`;
+      doc.setFontSize(9);
+      doc.text(footerText, doc.internal.pageSize.getWidth() - marginPt, doc.internal.pageSize.getHeight() - 10, { align: "right" });
+    },
+    theme: 'grid',
+    alternateRowStyles: { fillColor: [245, 245, 245] }
+  });
+
+  doc.save(fileName);
+  showExportToast();
+}
+
+
+<!-- show export succes modal -->
+function showExportToast(message = "PDF exported successfully!") {
+  const toast = document.getElementById("export-toast");
+  toast.textContent = message;
+  toast.style.opacity = "1";
+  toast.style.pointerEvents = "auto";
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.pointerEvents = "none";
+  }, 3000);
+}
+
 
 <!-- Delete Confirm Function -->
 function confirmResetSales() {
   document.getElementById("resetModal").style.display = "flex";
 }
-
 function closeResetModal() {
   document.getElementById("resetModal").style.display = "none";
 }
@@ -685,4 +863,4 @@ function easeOutQuad(t) {
 }
 </script>
  </body>
-  </html>
+  </html> 
