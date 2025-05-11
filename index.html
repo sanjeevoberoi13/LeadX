@@ -21,9 +21,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
   
   <!-- Service Worker -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#007aff">
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/sanjeevoberoi13/LeadX/refs/heads/main/icon-192.png">
+  <!-- link rel="manifest" href="manifest.json" -->
+  <!-- meta name="theme-color" content="#007aff" -->
+  <!-- link rel="apple-touch-icon" href="https://raw.githubusercontent.com/sanjeevoberoi13/LeadX/refs/heads/main/icon-192.png" -->
   
   <!-- style CSS-->
   <style >
@@ -882,15 +882,15 @@ a, a:visited, a:hover, a:active {
   };
         }
         
-        <!-- install app service worker -->
+     //   <!-- install app service worker -->
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker registered:', reg.scope))
-        .catch(err => console.log('Service Worker registration failed:', err));
-    });
-  }
+ // if ('serviceWorker' in navigator) {
+   //   window.addEventListener('load', () => {
+   //   navigator.serviceWorker.register('sw.js')
+   //     .then(reg => console.log('Service Worker registered:', reg.scope))
+   //     .catch(err => console.log('Service Worker registration failed:', err));
+//    });
+//  }
     </script>
 </body>
 </html>
