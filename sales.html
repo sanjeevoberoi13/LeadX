@@ -36,7 +36,9 @@
       --pink: #2b58ff5d;
       --bt-textclr: #0057ff;
       --toast-dark: #13e44511;
-      --border: #11c7bf
+      --border: #11c7bf;
+      --dash-svg: #7027e9;
+      --dash-bg: #e9e9e9;
     }
     .dark-mode {
       --bg-color: #1e1e1e;
@@ -49,6 +51,8 @@
       --bt-textclr: #d995ff;
       --toast-dark: #fffff;
       --border: #0a736e;
+      --dash-svg: #f4bf00;
+      --dash-bg: #4f4f4f;
       }
 <!-- Tap Highlight -->
 button, input, textarea {
@@ -399,25 +403,32 @@ a, a:visited, a:hover, a:active {
   </div>
   </div>
   <div class="stats">
+    
     <div class="card">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQXS-SKPUYGX17O7-yy5HsNf4P5WnJLPCUjpG4YX2rzZ0ipwQn_wHow0RV&s=10" style="margin-top: 4px;" class="icon-img">
-      <section>
-      <div>Total Bills</div>
-       <strong id="total-count">0</strong>
+        <section class="dasIcon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 24C0 10.7 10.7 0 24 0L69.5 0c22 0 41.5 12.8 50.6 32l411 0c26.3 0 45.5 25 38.6 50.4l-41 152.3c-8.5 31.4-37 53.3-69.5 53.3l-288.5 0 5.4 28.5c2.2 11.3 12.1 19.5 23.6 19.5L488 336c13.3 0 24 10.7 24 24s-10.7 24-24 24l-288.3 0c-34.6 0-64.3-24.6-70.7-58.5L77.4 54.5c-.7-3.8-4-6.5-7.9-6.5L24 48C10.7 48 0 37.3 0 24zM128 464a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm336-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"/></svg>
+       </section>
+       <section>
+         <div>Total Bills</div>
+         <strong id="total-count">0</strong>
       </section>
     </div>
     <div class="card">
-      <img src="https://images.icon-icons.com/3421/PNG/512/bag_cart_shop_online_shopping_ios_icon_218562.png" style="margin-top: 4px;" alt="" class="icon-img">
+      <section class="dasIcon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z"/></svg>
+      </section>
       <section>
-      <div>Total Sale amount</div>
-      <strong id="total-value">0</strong>
+        <div>Total Sale amount</div>
+        <strong id="total-value">0</strong>
       </section>
     </div>
     <div class="card">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMEMZhV2FYI_1kg7FMWfK0TQEO6GhFN1JLNEnv3zohMiR6LYK1WVvR3fQZ&s=10" style="margin-top: 4px;" alt="" class="icon-img">
+      <section class="dasIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M384 312.7c-55.1 136.7-187.1 54-187.1 54-40.5 81.8-107.4 134.4-184.6 134.7-16.1 0-16.6-24.4 0-24.4 64.4-.3 120.5-42.7 157.2-110.1-41.1 15.9-118.6 27.9-161.6-82.2 109-44.9 159.1 11.2 178.3 45.5 9.9-24.4 17-50.9 21.6-79.7 0 0-139.7 21.9-149.5-98.1 119.1-47.9 152.6 76.7 152.6 76.7 1.6-16.7 3.3-52.6 3.3-53.4 0 0-106.3-73.7-38.1-165.2 124.6 43 61.4 162.4 61.4 162.4 .5 1.6 .5 23.8 0 33.4 0 0 45.2-89 136.4-57.5-4.2 134-141.9 106.4-141.9 106.4-4.4 27.4-11.2 53.4-20 77.5 0 0 83-91.8 172-20z"/></svg>
+      </section>
       <section>
-      <div>ResQ Sale</div>
-      <strong id="rcp-count">0</strong>
+        <div>ResQ Sale</div>
+        <strong id="rcp-count">0</strong>
       </section>
     </div>
   </div>  
