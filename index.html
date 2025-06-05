@@ -165,7 +165,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 1.4rem;
   background: #ffffff8f;
   backdrop-filter: blur(25px);
   border-bottom: 3px dotted #787878;
@@ -519,15 +519,30 @@ a, a:visited, a:hover, a:active {
   </div>
 </div>
     <!-- HEADER -->
-    <div class="hd">
-        <div class="header">
-            <div onclick="toggleMenu()">
-                <i class="fas fa-location-arrow"></i>
-            </div>
-            <div id="theme-toggle" class="theme-btn">
-                <i class="far fa-moon"></i>
-            </div>
-        </div>
+    <div class="header">
+  <!-- Left side: location icon + user profile -->
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <div onclick="toggleMenu()">
+      <i class="fas fa-bars" style="font-size:21px;"></i>
+    </div>
+    <div id="user-profile" style="display: none; align-items: center; gap: 8px;">
+      <img id="profile-pic"
+     src=""
+     alt="Profile"
+     style="width: 32px; height: 32px; border-radius: 50%;"
+     onerror="this.onerror=null; this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIwoYUmRwwk60oQVwIEFkoOn5iQZ1jNYkMh80kZ5KkIauzp7E-4kCAkvw&s=10';" />
+       <div class="name">
+           <p style="opacity: 90%; color: #818181;">Welcome,</p>
+           <span id="user-name" style="font-size: 14px; font-weight: 500;"></span>
+       </div>
+   </div>
+  </div>
+
+  <!-- Right side: dark mode toggle -->
+  <div id="theme-toggle" class="theme-btn">
+    <i class="far fa-moon"></i>
+  </div>
+</div>
         <!-- HEADER STATS BOX -->
         <div class="stats">
             <div class="stat-box">
@@ -660,17 +675,31 @@ window.googleLogin = async function () {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+
     localStorage.setItem("user", JSON.stringify(user));
     currentUser = user;
     userId = user.uid;
+
+    // ✅ Show profile info
+    const profilePic = document.getElementById("profile-pic");
+const userName = document.getElementById("user-name");
+const profileBox = document.getElementById("user-profile");
+
+if (profilePic && userName && profileBox) {
+  profilePic.src = user.photoURL || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIwoYUmRwwk60oQVwIEFkoOn5iQZ1jNYkMh80kZ5KkIauzp7E-4kCAkvw&s=10";
+  userName.textContent = user.displayName;
+  profileBox.style.display = "flex";
+}
+
+    document.getElementById("login-overlay").style.display = "none";
     toggleAuthButtons(true);
-    document.getElementById("login-overlay").style.display = "none"; // ✅ Hide full overlay
     renderLeads();
   } catch (error) {
     alert("Login Failed: " + error.message);
     toggleAuthButtons(false);
   }
 };
+
 
 // ✅ Logout function
 window.logout = async function () {
@@ -754,7 +783,6 @@ window.deleteLead = async function () {
   }
 };
 
-
 // ✅ Render all leads from Firestore
 window.renderLeads = async function () {
   const tbody = document.querySelector("#lead-table tbody");
@@ -801,14 +829,25 @@ window.renderLeads = async function () {
 window.onload = async () => {
   const storedUser = localStorage.getItem("user");
 
-  if (!storedUser) {
-  // no prompt — just wait for user to click button
-} else {
+  if (storedUser) {
   currentUser = JSON.parse(storedUser);
   userId = currentUser.uid;
+
   toggleAuthButtons(true);
-  document.getElementById("login-overlay").style.display = "none"; // ✅ Hide overlay if logged in
   renderLeads();
+
+  // ✅ Restore profile
+  const profilePic = document.getElementById("profile-pic");
+const userName = document.getElementById("user-name");
+const profileBox = document.getElementById("user-profile");
+
+if (profilePic && userName && profileBox) {
+  profilePic.src = currentUser.photoURL || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIwoYUmRwwk60oQVwIEFkoOn5iQZ1jNYkMh80kZ5KkIauzp7E-4kCAkvw&s=10";
+  userName.textContent = currentUser.displayName;
+  profileBox.style.display = "flex";
+}
+
+  document.getElementById("login-overlay").style.display = "none";
 }
 
   // Close modal if clicked outside
@@ -961,6 +1000,7 @@ window.exportToPDF = async () => {
   // ✅ Save PDF
   doc.save(`Leads_${currentUser.displayName.replace(/\s/g, "_")}.pdf`);
 };
+
 </script>
 </body>
 </html>
