@@ -394,17 +394,28 @@ a, a:visited, a:hover, a:active {
   </button>
   <p style="font-size: 18px;line-height: 28px;"><strong>Sale Report</strong></p>
  
-  <nav id="nav-menu" style="display:none; position:absolute; top:80px; left: 14px;; background:white; border:1px solid #ddd; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); z-index:10001; min-width: 160px;">
+  <nav id="nav-menu" style="display:none; position:absolute; top: 45px; left: 14px; background:white; border:1px solid #ddd; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); z-index:10001; min-width: 160px;">
     <ul style="list-style:none; padding:10px; margin:0;">
-      <li><label style="display:flex; align-items:center; gap:8px;">
-        <input type="checkbox" id="theme-toggle"> Dark Mode
-      </label></li>
-      <li><button onclick="openExportModal()" style="margin-top: 10px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">Export</button></li>
-      <a href="mailto:sanjeevoberoi@proton.me?subject=Support%20for%20LeadX%20%F0%9F%91%8B%F0%9F%8F%BB&body=Need%20support%20for%20LeadX">
-        <li><button onclick="" style="margin-top: 5px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">support</li></a>
-        <li><button onclick="confirmResetSales()" style="margin-top: 5px; width: 100%; padding: 8px; background:#ff3b30; color:white; border:none; border-radius:6px;">Reset Sales</button></li>
+      <li>
+         <label style="display:flex; align-items:center; gap:8px;">
+           <input type="checkbox" id="theme-toggle"> Dark Mode
+         </label>
+      </li>
+      <li>
+          <li class="navProfile" style="padding: 3px 6px; display: flex; background: #f0f0f0; border-radius: 50px 20px 20px 50px; margin: 5px 0px;">
+              <img id="nav-profile-pic" src="" style="width: 35px; height: 35px; border-radius: 50%; margin-top: 3px;" />
+              <section style="padding: 0px 7px; color: black;">
+                  <p>Hello,</p>
+                  <h3 id="nav-username">User</h3>
+              </section>
+          </li>
+          <button onclick="openExportModal()" style="margin-top: 10px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">Export</button></li>
+          <a href="mailto:sanjeevoberoi@proton.me?subject=Support%20for%20LeadX%20%F0%9F%91%8B%F0%9F%8F%BB&body=Need%20support%20for%20LeadX">
+          <li><button onclick="" style="margin-top: 5px; width: 100%; padding: 8px; background:#007aff; color:white; border:none; border-radius:6px;">support</li></a>
+          <li><button onclick="confirmResetSales()" style="margin-top: 5px; width: 100%; padding: 8px; background:#ff3b30; color:white; border:none; border-radius:6px;">Reset Sales</button></li>
     </ul>
   </nav>
+  
   <button onclick="openModal()" id="AddButton" style="color: #0081ff;">
       <i class="far fa-add"></i>
       
@@ -1164,6 +1175,25 @@ async function loadSales() {
     }
   }
   
+  
+  // ✅ Nav user 
+  
+  if (user) {
+  const fullName = user.displayName || "User";
+  const firstName = fullName.split(" ")[0]; // get the first word
+  const profileURL = user.photoURL || "";
+
+  // Set both profile pictures
+  const mainPic = document.getElementById("profile-pic");
+  const navPic = document.getElementById("nav-profile-pic");
+
+  if (mainPic) mainPic.src = profileURL;
+  if (navPic) navPic.src = profileURL;
+
+  // Set username
+  const usernameElement = document.getElementById("nav-username");
+  if (usernameElement) usernameElement.textContent = firstName;
+}
 </script>
 </body>
   </html> 
