@@ -8,6 +8,20 @@
   <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
   
   <!-- Fonts CDN -->
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-duotone-thin.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-duotone-solid.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-duotone-regular.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-duotone-light.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-thin.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-solid.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-regular.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/sharp-light.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/duotone-thin.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/duotone-regular.css">
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/duotone-light.css">
+      
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playwrite+DE+LA:wght@100..400&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -500,7 +514,6 @@ a, a:visited, a:hover, a:active {
       width: 100%;
       margin: 30px 0px;
 }
-    
 </style>
 </head>
 <body>
@@ -519,7 +532,7 @@ a, a:visited, a:hover, a:active {
   <!-- Left side: location icon + user profile -->
   <div style="display: flex; align-items: center; gap: 12px;">
     <div onclick="toggleMenu()">
-      <i class="fas fa-bars" style="font-size:21px;"></i>
+      <i class="fa-duotone fa-solid fa-grip-vertical" style="font-size:21px;"></i>
     </div>
     <div id="user-profile" style="display: none; align-items: center; gap: 8px;">
       <img id="profile-pic"
@@ -535,8 +548,8 @@ a, a:visited, a:hover, a:active {
   </div>
 
   <!-- Right side: dark mode toggle -->
-  <div id="theme-toggle" class="theme-btn">
-    <i class="far fa-moon"></i>
+  <div id="theme-toggle" class="theme-btn" style="font-size: 1.4rem;">
+    <i class="fa-duotone fa-solid fa-moon-stars"></i>
   </div>
 </div>
         <!-- HEADER STATS BOX -->
@@ -556,7 +569,9 @@ a, a:visited, a:hover, a:active {
         </div>
         <!-- HEADER ACTION BUTTONS -->
         <div class="controls">
-            <button onclick="openLeadForm()">Add Lead</button>
+            <button onclick="openLeadForm()">
+                <i class="fa-duotone fa-solid fa-feather"></i>
+                Add Lead</button>
             <input type="text" id="search-input" placeholder="Search lead..." oninput="filterLeads()" style="padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; width: 200px;">
         </div>
         <!-- LEAD BOX -->
@@ -586,24 +601,24 @@ a, a:visited, a:hover, a:active {
                     <option value="Closed">Closed</option>
                 </select>
                 <textarea id="lead-comment" rows="3" placeholder="Comment (optional)"></textarea>
-                <button onclick="saveLead()">Generate Lead</button>
-                <button onclick="deleteLead()" id="delete-btn" style="background: #e60000;">Delete Lead</button>
+                <button onclick="saveLead()"><i class="fa-duotone fa-solid fa-download"></i> Generate Lead</button>
+                <button onclick="deleteLead()" id="delete-btn" style="background: #e60000;"><i class="fa-duotone fa-solid fa-trash-can-list"></i> Delete Lead</button>
             </div>
         </div>
 
         <!-- MENU BOX -->
         <div id="locationMenu" class="location-popup hidden">
             <div class="menu-item" onclick="exportToExcel()">
-                <i class="fas fa-file-excel"></i> Export to Excel
+                <i class="fa-duotone fa-solid fa-file-excel"></i> Export to Excel
             </div>
             <div class="menu-item" onclick="exportToPDF()">
-                <i class="fas fa-file-pdf"></i> Export to Pdf
+                <i class="fa-duotone fa-solid fa-file-pdf"></i> Export to Pdf
             </div>
           <div class="menu-item"">
-                <i class="fas fa-database"></i><a href="sales.html"> Add Sales Data </a>
+                <i class="fa-duotone fa-solid fa-server"></i><a href="sales.html"> Add Sales Data </a>
           </div>
           <div class="menu-item"">
-                <button onclick="logout()" class="auth-btn">Logout</button>
+                <button onclick="logout()" class="auth-btn">Logout <i class="fa-duotone fa-solid fa-right-from-bracket"></i></button>
                 <button onclick="googleLogin()" class="auth-btn">Login with Google</button>
 
           </div>
@@ -618,7 +633,7 @@ a, a:visited, a:hover, a:active {
         </div>
     </footer>
     
-     <!-- FOOTER ENDS -->
+    <!-- FOOTER ENDS -->
  <div style="width: 100%; overflow: hidden; display: flex; justify-content: center;">
   <div id="ad-container" style="width: 100%; max-width: 100%; text-align: center;">
     <script type="text/javascript">
@@ -626,7 +641,7 @@ a, a:visited, a:hover, a:active {
         'key': 'af41ed77bb9af6db5381e4d0ca7a031a',
         'format': 'iframe',
         'width': 100%,
-        'params': {}
+        'params': {},
       };
     </script>
     <script type="text/javascript" src="//www.highperformanceformat.com/af41ed77bb9af6db5381e4d0ca7a031a/invoke.js"></script>
