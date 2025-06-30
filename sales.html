@@ -147,7 +147,7 @@ header h1 {
 }
 
 .controls {
-  
+  position: relative;
   color: var(--text-color);
   flex-direction: column;
   gap: 0rem;
@@ -388,6 +388,41 @@ a, a:visited, a:hover, a:active {
   height: 20px;
   fill: var(--dash-svg);
 }
+
+.ios-suggestions {
+  position: absolute;
+  top: 110%; /* just below input */
+  
+  left: 0;
+  right: 0;
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  z-index: 9999;
+  border: 1px solid #ddd;
+  display: none;
+  overflow: hidden;
+  backdrop-filter: blur(15px);
+  font-size: 15px;
+}
+
+.ios-suggestions div {
+  
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.ios-suggestions div:hover {
+  background-color: #f2f2f2;
+}
+.dark-mode .ios-suggestions {
+  background: #2b2b2b;
+  border: 1px solid #444;
+}
+
+.dark-mode .ios-suggestions div:hover {
+  background: #3a3a3a;
+}
   </style>
 </head>
 <body>
@@ -433,6 +468,7 @@ a, a:visited, a:hover, a:active {
 <div class="controls">
     <i class="fa-duotone fa-solid fa-magnifying-glass"></i>
     <input type="text" id="search-input" placeholder=" Search Sale..." oninput="filterSales()">
+    <div id="search-suggestions" class="ios-suggestions"></div>
   </div>
   </div>
   <div class="stats">
@@ -1184,6 +1220,27 @@ async function loadSales() {
     }
   }
   
+  // ✅ user fetch using phone number
+  
+  document.getElementById("phone").addEventListener("input", async function () {
+  const phone = this.value.trim();
+  if (phone.length < 5 || !userId) return; // Prevent premature query
+
+  try {
+    const snapshot = await db.collection("users").doc(userId).collection("sales")
+      .where("phone", "==", phone).limit(1).get();
+
+    if (!snapshot.empty) {
+      const data = snapshot.docs[0].data();
+      const nameField = document.getElementById("name");
+      if (!nameField.value && data.name) {
+        nameField.value = data.name;
+      }
+    }
+  } catch (err) {
+    console.error("Auto-fill failed:", err);
+  }
+});
   
   // ✅ Nav user 
   
@@ -1203,6 +1260,67 @@ async function loadSales() {
   const usernameElement = document.getElementById("nav-username");
   if (usernameElement) usernameElement.textContent = firstName;
 }
+
+// ✅ Search suggestion 
+
+const searchInput = document.getElementById("search-input");
+const suggestionBox = document.getElementById("search-suggestions");
+
+searchInput.addEventListener("input", async function () {
+  const query = this.value.trim().toLowerCase();
+  if (query.length < 3 || !userId) {
+    suggestionBox.style.display = "none";
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection("users").doc(userId).collection("sales")
+      .orderBy("timestamp", "desc")
+      .limit(50)
+      .get();
+
+    const suggestions = new Set();
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const name = data.name?.toLowerCase() || "";
+      const phone = data.phone?.toLowerCase() || "";
+
+      if (name.includes(query)) suggestions.add(data.name);
+      if (phone.includes(query)) suggestions.add(data.phone);
+    });
+
+    showSuggestions([...suggestions].slice(0, 6)); // Limit to 5 suggestions
+  } catch (err) {
+    console.error("Suggestion fetch failed:", err);
+  }
+});
+
+function showSuggestions(items) {
+  if (items.length === 0) {
+    suggestionBox.style.display = "none";
+    return;
+  }
+
+  suggestionBox.innerHTML = items.map(item => `
+    <div style="padding: 10px 5px; cursor: pointer; border-bottom: 1px solid #7777777b;" 
+         onclick="selectSuggestion('${item.replace(/'/g, "\\'")}')">${item}</div>
+  `).join("");
+
+  suggestionBox.style.display = "block";
+}
+
+window.selectSuggestion = function (value) {
+  searchInput.value = value;
+  suggestionBox.style.display = "none";
+  filterSales(); // Call existing filter function
+}
+
+// Optional: hide suggestion box if clicked outside
+document.addEventListener("click", function (e) {
+  if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
+    suggestionBox.style.display = "none";
+  }
+});
 </script>
 </body>
   </html> 
