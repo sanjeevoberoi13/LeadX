@@ -27,6 +27,9 @@
   <!-- pdf js. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <!-- zip CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <!-- firebase Script -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -906,36 +909,58 @@ async function loadSales() {
     document.getElementById("confirmModal").style.display = "none";
   }
 
-  // Delete all sales if confirmed
+  // ✅ Delete all sales if confirmed
+  
   async function deleteAllSales() {
-    const input = document.getElementById("confirm-input").value.trim().toLowerCase();
-    if (input !== "confirm") {
-      alert('Type "confirm" to proceed.');
-      return;
-    }
-
-    if (!userId) {
-      alert("User not logged in.");
-      return;
-    }
-
-    try {
-      const snapshot = await db.collection("users").doc(userId).collection("sales").get();
-      const batch = db.batch();
-
-      snapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-
-      await batch.commit();
-      alert("All sales deleted.");
-      document.getElementById("confirmModal").style.display = "none";
-      loadSales();
-    } catch (err) {
-      alert("Failed to delete sales: " + err.message);
-    }
+  const input = document.getElementById("confirm-input").value.trim().toLowerCase();
+  if (input !== "confirm") {
+    alert('Type "confirm" to proceed.');
+    return;
   }
- 
+
+  if (!userId || !user) {
+    alert("User not logged in.");
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection("users").doc(userId).collection("sales").get();
+    const sales = [];
+    const batch = db.batch();
+
+    snapshot.forEach(doc => {
+      sales.push(doc.data());
+      batch.delete(doc.ref);
+    });
+
+    if (sales.length === 0) {
+      alert("No sales found.");
+      return;
+    }
+
+    const dateStr = new Date().toISOString().split("T")[0];
+    const zipName = `Sale_report_${dateStr}`;
+
+    const [excelBlob, pdfBlob] = await Promise.all([
+      getExcelBlob(sales),
+      getPdfBlob(sales, user)
+    ]);
+
+    const zip = new JSZip();
+    zip.file(`${zipName}.xlsx`, excelBlob);
+    zip.file(`${zipName}.pdf`, pdfBlob);
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    saveAs(zipBlob, `${zipName}.zip`);
+
+    await batch.commit();
+    alert("ZIP downloaded & all sales deleted.");
+    document.getElementById("confirmModal").style.display = "none";
+    loadSales();
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+}
  
  
        // ✅ export to excel
@@ -1104,6 +1129,88 @@ async function loadSales() {
     }, 3000);
   }
   
+  
+  
+ // ✅ Blob helper for zip creation 
+ 
+ 
+ async function getExcelBlob(sales) {
+  const wb = XLSX.utils.book_new();
+  const ws_data = [
+    ["Name", "Phone", "Product", "Sale", "RCP", "Date"],
+    ...sales.map(s => [s.name, s.phone, s.product, s.sale, s.rcp, s.date || ""])
+  ];
+
+  const totalSale = sales.reduce((sum, s) => sum + Number(s.sale || 0), 0);
+  const totalRcp = sales.reduce((sum, s) => sum + Number(s.rcp || 0), 0);
+  ws_data.push(["", "", "Total", totalSale, totalRcp, ""]);
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, "Sales");
+
+  const excelArrayBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  return new Blob([excelArrayBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+}
+async function getPdfBlob(sales, user) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+
+  const marginPt = 21.6;
+  const now = new Date();
+
+  const pad = n => String(n).padStart(2, '0');
+  const dateStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  
+  doc.setFontSize(16);
+  doc.text("SALE REPORT", marginPt, marginPt);
+  doc.setFontSize(10);
+  doc.text(`DATE : ${dateStr}`, marginPt, marginPt + 14);
+  doc.text(`TIME : ${timeStr}`, marginPt, marginPt + 28);
+  doc.text(`USER : ${user.displayName || "N/A"}`, marginPt, marginPt + 42);
+  doc.text(`EMAIL: ${user.email || "N/A"}`, marginPt, marginPt + 56);
+
+  const rows = sales.map(s => [
+    s.name || "", s.phone || "", s.product || "",
+    s.sale || "", s.rcp || "", s.date || ""
+  ]);
+  const totalSale = sales.reduce((sum, s) => sum + Number(s.sale || 0), 0);
+  const totalRcp = sales.reduce((sum, s) => sum + Number(s.rcp || 0), 0);
+  rows.push(["", "", "Total", totalSale, totalRcp, ""]);
+
+  doc.autoTable({
+    startY: marginPt + 70,
+    head: [["Name", "Phone", "Product", "Sale", "RCP", "Date"]],
+    body: rows,
+    margin: { left: marginPt, right: marginPt },
+    styles: { fontSize: 9, cellPadding: 2 },
+    headStyles: {
+      fillColor: [0, 122, 255],
+      textColor: 255,
+      fontStyle: 'bold'
+    },
+    theme: 'grid',
+    alternateRowStyles: { fillColor: [245, 245, 245] },
+    didParseCell(data) {
+      if (data.row.index === rows.length - 1) {
+        data.cell.styles.fontStyle = 'bold';
+      }
+    },
+    didDrawPage(data) {
+      const pageCount = doc.internal.getNumberOfPages();
+      const pageCurrent = doc.internal.getCurrentPageInfo().pageNumber;
+      const footerText = `Page ${pageCurrent} of ${pageCount}`;
+      doc.setFontSize(9);
+      doc.text(footerText, doc.internal.pageSize.getWidth() - marginPt, doc.internal.pageSize.getHeight() - 10, { align: "right" });
+    }
+  });
+
+  return doc.output("blob");
+}
+
+
   
   
         // ✅ Scan Barcode Function 
@@ -1323,4 +1430,4 @@ document.addEventListener("click", function (e) {
 });
 </script>
 </body>
-  </html> 
+  </html>
