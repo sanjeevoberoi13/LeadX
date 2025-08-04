@@ -426,6 +426,53 @@ a, a:visited, a:hover, a:active {
 .dark-mode .ios-suggestions div:hover {
   background: #3a3a3a;
 }
+#productSearchModal {
+  display: none;
+  position: fixed;
+  padding: 10px;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+#product-search-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: var(--modal-bg);
+  padding: .7rem 1rem;
+  display: flex;
+  gap: 0.1rem;
+  z-index: 1001;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+#product-search-bar input {
+  flex: 1;
+  padding: .4rem 1rem;
+  font-size: 16px;
+  border: 1px solid #8080807a;
+  border-radius: 50px;
+  background: none;
+  color: var(--text-color);
+}
+
+#product-suggestions {
+  position: fixed;
+  top: 72px; /* below search bar */
+  left: 0; right: 0;
+  margin: 0 10px;
+  max-width: 500px;
+  background: var(--card-bg);
+  
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  z-index: 1002;
+  display: none; /* controlled by JS */
+  overflow: auto;
+  max-height: 400px;
+}
   </style>
 </head>
 <body>
@@ -532,6 +579,7 @@ a, a:visited, a:hover, a:active {
       <div class="product-row">
         <input type="text" id="product" placeholder="Product">
         <button type="button" class="scan" onclick="startScan()">Scan</button>
+        <button type="button" class="scan" onclick="openProductSearch()">Search</button>
       </div>
       <input type="text" id="sale" placeholder="Sale" oninput="validateNumberInput(this)">
       <input type="text" id="rcp" placeholder="RCP" oninput="validateNumberInput(this)">
@@ -539,6 +587,19 @@ a, a:visited, a:hover, a:active {
       <button class="delete" id="delete-btn" onclick="deleteSale()" style="display:none;">Delete</button>
     </div>
   </div>  
+  <!-- search product modal -->
+<div class="modal" id="productSearchModal">
+  <!-- This wraps the fixed search bar -->
+  <div id="product-search-bar">
+    <input type="text" id="product-search-input" placeholder="Enter product name...">
+    <button onclick="closeProductSearch()" style="margin-left: 10px; padding: 10px; background: #9180ff; border: none; border-radius: 50px; color: white;">
+   <i class="fa-solid fa-rotate-left"></i> Close
+    </button>
+  </div>
+
+  <!-- Suggestions list -->
+  <div id="product-suggestions" class="ios-suggestions"></div>
+</div>
 
 <div id="reader-wrapper">
   <div id="reader"></div>
@@ -1236,9 +1297,94 @@ async function getPdfBlob(sales, user) {
   return doc.output("blob");
 }
 
+        // ✅ search product Function 
+        
 
-  
-  
+let cachedProductRows = null; // will hold CSV rows
+
+async function fetchProductCSV() {
+  console.log("Fetching CSV...");
+  try {
+    const response = await fetch("https://docs.google.com/spreadsheets/d/1Es0SEOINmzGHBhoAcuVt9CD2s5Zc8DZz/export?format=csv");
+    const csv = await response.text();
+    cachedProductRows = csv.split(/\r?\n/)
+      .map(row => row.split(",").map(cell => cell.trim()))
+      .filter(r => r.length > 1);
+    console.log("CSV loaded, rows:", cachedProductRows.length);
+  } catch (err) {
+    console.error("Failed to load CSV:", err);
+  }
+}
+
+function openProductSearch() {
+  document.getElementById("productSearchModal").style.display = "flex";
+  if (!cachedProductRows) {
+    fetchProductCSV();
+  }
+}
+
+function closeProductSearch() {
+  document.getElementById("productSearchModal").style.display = "none";
+  document.getElementById("product-suggestions").style.display = "none";
+}
+
+const productSearchInput = document.getElementById("product-search-input");
+const productSuggestions = document.getElementById("product-suggestions");
+
+productSearchInput.addEventListener("input", async function () {
+  const query = this.value.trim().toLowerCase();
+  if (query.length < 2) {
+    productSuggestions.style.display = "none";
+    return;
+  }
+
+  if (!cachedProductRows) {
+    console.warn("CSV not loaded yet!");
+    productSuggestions.style.display = "none";
+    return;
+  }
+
+  const headers = cachedProductRows[0].map(h => h.trim().toLowerCase());
+  console.log("Headers:", headers);
+
+  const descIndex = headers.findIndex(h => h.includes("material") && h.includes("description"));
+  console.log("descIndex:", descIndex);
+
+  if (descIndex === -1) {
+    alert("No Material Description column found.");
+    return;
+  }
+
+  const matches = cachedProductRows.filter((row, i) => {
+    if (i === 0) return false;
+    if (!row[descIndex]) return false;
+    return row[descIndex].toLowerCase().includes(query);
+  }).slice(0, 15);
+
+  console.log("MATCHES:", matches);
+
+  if (matches.length === 0) {
+    productSuggestions.style.display = "none";
+    return;
+  }
+
+  productSuggestions.innerHTML = matches.map(row => {
+    console.log("Row:", row);
+    let desc = row[descIndex] || "";
+    desc = desc.trim().replace(/^"+|"+$/g, "");
+    if (!desc) desc = "(EMPTY)";
+    return `<div style="padding: 5px; cursor: pointer; border-bottom: 1px solid #ddd; background: var(--modal-bg); color: var(--text-color);"
+      onclick="selectProduct('${desc.replace(/'/g, "\\'")}')">${desc}</div>`;
+  }).join("");
+
+  productSuggestions.style.display = "block";
+});
+
+function selectProduct(productName) {
+  document.getElementById("product").value = productName;
+  closeProductSearch();
+}
+
         // ✅ Scan Barcode Function 
   
   
